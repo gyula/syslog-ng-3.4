@@ -7,11 +7,14 @@ extern int afmysql_debug;
 int afmysql_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 
 static CfgLexerKeyword afmysql_keywords[] = {
-  { "sql",                KW_SQL },
+  { "mysql",                KW_MYSQL },
   { "username",           KW_USERNAME },
   { "password",           KW_PASSWORD },
   { "database",           KW_DATABASE },
   { "table",              KW_TABLE },
+  
+  { "loaddata",           KW_LOAD},
+  { "bulkinsert",         KW_BULK},
 
   { "columns",            KW_COLUMNS },
   { "indexes",            KW_INDEXES },
@@ -21,8 +24,6 @@ static CfgLexerKeyword afmysql_keywords[] = {
   { "session_statements", KW_SESSION_STATEMENTS, 0x0302 },
   { "host",               KW_HOST },
   { "port",               KW_PORT },
-  { "type",               KW_TYPE },
-  { "default",            KW_DEFAULT },
 
   { "time_zone",          KW_TIME_ZONE },
   { "local_time_zone",    KW_LOCAL_TIME_ZONE },

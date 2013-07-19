@@ -7,7 +7,7 @@ static Plugin afmysql_plugins[] =
 {
   {
     .type = LL_CONTEXT_DESTINATION,
-    .name = "sql",
+    .name = "mysql",
     .parser = &afmysql_parser,
   },
 };
