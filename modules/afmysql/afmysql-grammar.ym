@@ -29,6 +29,7 @@ extern LogDriver *last_driver;
 
 /* INCLUDE_DECLS */
 
+%token KW_MYSQL
 %token KW_DEFAULT
 %token KW_RETRIES
 %token KW_DBD_OPTION
@@ -42,8 +43,12 @@ extern LogDriver *last_driver;
 %%
 
 start
-        : LL_CONTEXT_DESTINATION dest_afmysql                        { YYACCEPT; }
-        ;
+        : LL_CONTEXT_DESTINATION KW_MYSQL
+          {
+            last_driver = *instance = afmysql_dd_new();
+          }
+          '(' afmysql_options ')'         { YYACCEPT; }
+	;
 
 
 dest_afmysql
