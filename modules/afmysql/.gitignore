@@ -1,0 +1,15 @@
+Makefile
+Makefile.in
+afmysql-grammar.h
+afmysql-grammar.c
+.deps
+.libs
+*.in
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.y
+*.lo
