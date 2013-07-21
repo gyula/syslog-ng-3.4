@@ -1214,6 +1214,7 @@ AC_OUTPUT(dist.conf
 	  modules/Makefile 
           modules/afsocket/Makefile
           modules/afsql/Makefile
+          modules/afmysql/Makefile
           modules/afstreams/Makefile
           modules/affile/Makefile
           modules/afprog/Makefile
