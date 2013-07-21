@@ -172,7 +172,7 @@ CORE_DEPS_LIBS =   -lrt -lnsl -Wl,--export-dynamic -pthread -lgmodule-2.0 -lgthr
 CPP = gcc -std=gnu99 -E
 CPPFLAGS =  -pthread -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include   -I/usr/include/eventlog       -D_BSD_SOURCE -D__BSD_SOURCE -D__FAVOR_BSD -DHAVE_NET_ETHERNET_H -I/usr/include -I$(top_srcdir)/lib/ivykis/src/include -I$(top_builddir)/lib/ivykis/src/include -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CRYPTO_LIBS = ${top_builddir}/lib/libsyslog-ng-crypto.la
-CURRDATE = Sun, 21 Jul 2013 17:18:48 +0200
+CURRDATE = Sun, 21 Jul 2013 17:46:57 +0200
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps

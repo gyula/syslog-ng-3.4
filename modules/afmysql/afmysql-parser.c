@@ -13,8 +13,8 @@ static CfgLexerKeyword afmysql_keywords[] = {
   { "database",           KW_DATABASE },
   { "table",              KW_TABLE },
   
-  { "loaddata",           KW_LOAD},
-  { "bulkinsert",         KW_BULK},
+  { "loaddata",           KW_LOAD },
+  { "bulkinsert",         KW_BULK },
 
   { "columns",            KW_COLUMNS },
   { "indexes",            KW_INDEXES },
