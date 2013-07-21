@@ -4,14 +4,14 @@ export top_srcdir
 
 if ENABLE_SQL
 
-module_LTLIBRARIES := libafsql.la
-libafsql_la_SOURCES = \
+module_LTLIBRARIES := libafmysql.la
+libafmysql_la_SOURCES = \
 	afmysql.c afmysql.h \
 	afmysql-grammar.y afmysql-parser.c afmysql-parser.h afmysql-plugin.c
 
-libafsql_la_CPPFLAGS = $(AM_CPPFLAGS) -DENABLE_SQL=1
-libafsql_la_LIBADD = $(MODULE_DEPS_LIBS) $(OPENSSL_LIBS)
-libafsql_la_LDFLAGS = $(MODULE_LDFLAGS)
+libafmysql_la_CPPFLAGS = $(AM_CPPFLAGS) -DENABLE_SQL=1
+libafmysql_la_LIBADD = $(MODULE_DEPS_LIBS) $(OPENSSL_LIBS)
+libafmysql_la_LDFLAGS = $(MODULE_LDFLAGS)
 
 endif
 
