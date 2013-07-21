@@ -1,4 +1,4 @@
-#include "afsql.h"
+#include "afmysql.h"
 
 #if ENABLE_SQL
 
@@ -326,7 +326,7 @@ afmysql_dd_create_index(AFMYSqlDestDriver *self, gchar *table, gchar *column)
  * NOTE: This function can only be called from the database thread.
  **/
 static GString *
-afsql_dd_validate_table(AFSqlDestDriver *self, LogMessage *msg)
+afsql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 {
   /*  */
 }
@@ -496,13 +496,13 @@ afmysql_dd_free(LogPipe *s)
 }
 
 LogDriver *
-afsql_dd_new(void)
+afmysql_dd_new(void)
 {
   /**/
 }
 
 gint
-afsql_dd_lookup_flag(const gchar *flag)
+afmysql_dd_lookup_flag(const gchar *flag)
 {
   /**/
 }
