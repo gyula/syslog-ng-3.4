@@ -453,7 +453,77 @@ afmysql_dd_wait_for_suspension_wakeup(AFMYSqlDestDriver *self)
 static gpointer
 afmysql_dd_database_thread(gpointer arg)
 {
- /**/
+  AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) arg;
+
+  msg_verbose("Database thread started",
+              evt_tag_str("driver", self->super.super.id),
+              NULL);
+  while (!self->db_thread_terminate)
+    {
+      g_mutex_lock(self->db_thread_mutex);
+      if (self->db_thread_suspended)
+        {
+          afsql_dd_wait_for_suspension_wakeup(self);
+          /* we loop back to check if the thread was requested to terminate */
+        }
+      else if (!log_queue_check_items(self->queue, NULL, afmysql_dd_message_became_available_in_the_queue, self, NULL))
+        {
+          /* we have nothing to INSERT into the database, let's wait we get some new stuff */
+
+          if (self->flush_lines_queued > 0)
+            {
+              if (!afmysql_dd_commit_txn(self))
+                {
+                  afmysql_dd_disconnect(self);
+                  afmysql_dd_suspend(self);
+                  g_mutex_unlock(self->db_thread_mutex);
+                  continue;
+                }
+            }
+          else if (!self->db_thread_terminate)
+            {
+              g_cond_wait(self->db_thread_wakeup_cond, self->db_thread_mutex);
+            }
+
+          /* we loop back to check if the thread was requested to terminate */
+        }
+      g_mutex_unlock(self->db_thread_mutex);
+
+      if (self->db_thread_terminate)
+        break;
+      
+      if (!afmysql_dd_insert_db(self))
+        {
+          afmysql_dd_disconnect(self);
+          afmysql_dd_suspend(self);
+        }
+    }
+    
+   while (log_queue_get_length(self->queue) > 0)
+    {
+      if (!afsql_dd_insert_db(self))
+        {
+          goto exit;
+        }
+    }
+    
+   if (self->flush_lines_queued > 0)
+    {
+      /* we can't do anything with the return value here. if commit isn't
+       * successful, we get our backlog back, but we have no chance
+       * submitting that back to the SQL engine.
+       */
+
+      afmysql_dd_commit_txn(self);
+    }
+
+ exit:
+  afmysql_dd_disconnect(self);
+
+  msg_verbose("Database thread finished",
+              evt_tag_str("driver", self->super.super.id),
+              NULL);
+  return NULL;
 }
 
 static void
