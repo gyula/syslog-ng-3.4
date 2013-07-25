@@ -537,7 +537,11 @@ afmysql_dd_start_thread(AFMYSqlDestDriver *self)
 static void
 afmysql_dd_stop_thread(AFMYSqlDestDriver *self)
 {
-  /**/
+  g_mutex_lock(self->db_thread_mutex);
+  self->db_thread_terminate = TRUE;
+  g_cond_signal(self->db_thread_wakeup_cond);
+  g_mutex_unlock(self->db_thread_mutex);
+  g_thread_join(self->db_thread);
 }
 
 static gchar *
