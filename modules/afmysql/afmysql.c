@@ -553,7 +553,12 @@ afmysql_dd_format_stats_instance(AFMYSqlDestDriver *self)
 static inline gchar *
 afmysql_dd_format_persist_name(AFMYSqlDestDriver *self)
 {
-  /**/
+  static gchar persist_name[256];
+
+  g_snprintf(persist_name, sizeof(persist_name),
+             "afmysql_dd(%s,%s,%s,%s,%s)",
+             self->type, self->host, self->port, self->database, self->table->template);
+  return persist_name;
 }
 
 
