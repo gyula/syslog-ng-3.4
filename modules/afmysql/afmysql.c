@@ -428,7 +428,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 }
 
 static void
-afmysql_dd_load_db(AFMYSqlDestDriver *self)
+afmysql_dd_load_db(void)
 {
   /* */ 
 }
@@ -459,7 +459,7 @@ afmysql_dd_database_thread(gpointer arg)
 static void
 afmysql_dd_start_thread(AFMYSqlDestDriver *self)
 {
-  /**/
+  self->db_thread = create_worker_thread(afmysql_dd_database_thread, self, TRUE, NULL);
 }
 
 static void
