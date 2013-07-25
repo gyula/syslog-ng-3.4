@@ -610,7 +610,15 @@ afmysql_dd_deinit(LogPipe *s)
 static void
 afmysql_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
-  /**/
+  AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
+  LogPathOptions local_options;
+
+  if (!path_options->flow_control_requested)
+    path_options = log_msg_break_ack(msg, path_options, &local_options);
+
+  log_msg_add_ack(msg, path_options);
+  log_queue_push_tail(self->queue, log_msg_ref(msg), path_options);
+  log_dest_driver_queue_method(s, msg, path_options, user_data);
 }
 
 static void
