@@ -444,7 +444,9 @@ afmysql_dd_message_became_available_in_the_queue(gpointer user_data)
 static void
 afmysql_dd_wait_for_suspension_wakeup(AFMYSqlDestDriver *self)
 {
- /**/
+ if (!self->db_thread_terminate)
+    g_cond_timed_wait(self->db_thread_wakeup_cond, self->db_thread_mutex, &self->db_thread_suspend_target);
+  self->db_thread_suspended = FALSE;
 }
 
 /**
