@@ -437,7 +437,11 @@ afmysql_dd_load_db(void)
 static void
 afmysql_dd_message_became_available_in_the_queue(gpointer user_data)
 {
-  /**/
+  AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) user_data;
+
+  g_mutex_lock(self->db_thread_mutex);
+  g_cond_signal(self->db_thread_wakeup_cond);
+  g_mutex_unlock(self->db_thread_mutex);
 }
 
 /* assumes that db_thread_mutex is held */
