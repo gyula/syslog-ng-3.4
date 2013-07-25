@@ -549,7 +549,12 @@ afmysql_dd_stop_thread(AFMYSqlDestDriver *self)
 static gchar *
 afmysql_dd_format_stats_instance(AFMYSqlDestDriver *self)
 {
-  /**/
+  static gchar persist_name[64];
+
+  g_snprintf(persist_name, sizeof(persist_name),
+             "%s,%s,%s,%s,%s",
+             self->type, self->host, self->port, self->database, self->table->template);
+  return persist_name;
 }
 
 static inline gchar *
@@ -752,7 +757,42 @@ afmysql_dd_free(LogPipe *s)
 LogDriver *
 afmysql_dd_new(void)
 {
-  /**/
+  AFMYSqlDestDriver *self = g_new0(AFMYSqlDestDriver, 1);
+
+  log_dest_driver_init_instance(&self->super);
+  self->super.super.super.init = afmysql_dd_init;
+  self->super.super.super.deinit = afmysql_dd_deinit;
+  self->super.super.super.queue = afmysql_dd_queue;
+  self->super.super.super.free_fn = afmysql_dd_free;
+
+  self->type = g_strdup("mysql");
+  self->host = g_strdup("");
+  self->port = g_strdup("");
+  self->user = g_strdup("syslog-ng");
+  self->password = g_strdup("");
+  self->database = g_strdup("logs");
+  self->encoding = g_strdup("UTF-8");
+
+  self->table = log_template_new(configuration, NULL);
+  log_template_compile(self->table, "messages", NULL);
+  self->failed_message_counter = 0;
+
+  self->flush_lines = -1;
+  self->flush_timeout = -1;
+  self->flush_lines_queued = -1;
+  self->session_statements = NULL;
+  self->num_retries = MAX_FAILED_ATTEMPTS;
+
+  self->validated_tables = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+  self->dbd_options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+  self->dbd_options_numeric = g_hash_table_new_full(g_str_hash, g_int_equal, g_free, NULL);
+
+  log_template_options_defaults(&self->template_options);
+  init_sequence_number(&self->seq_num);
+
+  self->db_thread_wakeup_cond = g_cond_new();
+  self->db_thread_mutex = g_mutex_new();
+  return &self->super.super;
 }
 
 gint
