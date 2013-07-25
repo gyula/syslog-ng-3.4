@@ -589,7 +589,22 @@ afmysql_dd_init(LogPipe *s)
 static gboolean
 afmysql_dd_deinit(LogPipe *s)
 {
-  /**/
+   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
+
+  afmysql_dd_stop_thread(self);
+  log_queue_reset_parallel_push(self->queue);
+
+  log_queue_set_counters(self->queue, NULL, NULL);
+
+  stats_lock();
+  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
+  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
+  stats_unlock();
+
+  if (!log_dest_driver_deinit_method(s))
+    return FALSE;
+
+  return TRUE;
 }
 
 static void
