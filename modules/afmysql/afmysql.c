@@ -11,6 +11,7 @@
 #include "timeutils.h"
 
 #include <string.h>
+#include <mysql.h>
 
 #if ENABLE_SSL
 #include <openssl/md5.h>
@@ -96,9 +97,12 @@ typedef struct _AFMYSqlDestDriver
  // dbi_conn dbi_ctx;
   GHashTable *validated_tables;
   guint32 failed_message_counter;
+  
+  //mysql related
+  MYSQL *connection;
+  MYSQL *mysql;
 } AFMYSqlDestDriver;
 
-//static gboolean dbi_initialized = FALSE;  ?????????? mysql init?
 
 #define MAX_FAILED_ATTEMPTS 3
 
@@ -373,7 +377,7 @@ afmysql_dd_suspend(AFMYSqlDestDriver *self)
 static void
 afmysql_dd_disconnect(AFMYSqlDestDriver *self)
 {
-  /**/
+  mysql_close(self -> connection);
 }
 
 static void
@@ -391,7 +395,8 @@ afmysql_dd_set_dbd_opt_numeric(gpointer key, gpointer value, gpointer user_data)
 static gboolean
 afmysql_dd_connect(AFMYSqlDestDriver *self)
 {
- /**/
+ mysql_init(self -> mysql);
+ self -> mysql = NULL;
 }
 
 static gboolean
@@ -474,7 +479,111 @@ afmysql_dd_format_persist_name(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_init(LogPipe *s)
 {
-   /**/
+  AFMYSqlDestDriver *self = (AFMYSqlDestDriver *)s;
+  GlobalConfig *cfg = log_pipe_get_config(s);
+  gint len_cols, len_values;
+  
+   if (!log_dest_driver_init_method(s))
+    return FALSE;
+   
+   if (!self->columns || !self->values)
+    {
+      msg_error("Default columns and values must be specified for database destinations",
+                evt_tag_str("database type", self->type),
+                NULL);
+      return FALSE;
+    }
+    
+  self->queue = log_dest_driver_acquire_queue(&self->super, afmysql_dd_format_persist_name(self));
+  log_queue_set_counters(self->queue, self->stored_messages, self->dropped_messages);
+  
+  if (!self->fields)
+    {
+      GList *col, *value;
+      gint i;
+
+      len_cols = g_list_length(self->columns);
+      len_values = g_list_length(self->values);
+      if (len_cols != len_values)
+        {
+          msg_error("The number of columns and values do not match",
+                    evt_tag_int("len_columns", len_cols),
+                    evt_tag_int("len_values", len_values),
+                    NULL);
+          goto error;
+        }
+      self->fields_len = len_cols;
+      self->fields = g_new0(AFMYSqlField, len_cols);
+      for (i = 0, col = self->columns, value = self->values; col && value; i++, col = col->next, value = value->next)
+        {
+          gchar *space;
+
+          space = strchr(col->data, ' ');
+          if (space)
+            {
+              self->fields[i].name = g_strndup(col->data, space - (gchar *) col->data);
+              while (*space == ' ')
+                space++;
+              if (*space != '\0')
+                self->fields[i].type = g_strdup(space);
+              else
+                self->fields[i].type = g_strdup("text");
+            }
+          else
+            {
+              self->fields[i].name = g_strdup(col->data);
+              self->fields[i].type = g_strdup("text");
+            }
+          if (!afmysql_dd_check_sql_identifier(self->fields[i].name, FALSE))
+            {
+              msg_error("Column name is not a proper SQL name",
+                        evt_tag_str("column", self->fields[i].name),
+                        NULL);
+              return FALSE;
+            }
+          if (GPOINTER_TO_UINT(value->data) > 4096)
+            {
+              self->fields[i].value = log_template_new(cfg, NULL);
+              log_template_compile(self->fields[i].value, (gchar *) value->data, NULL);
+            }
+         else
+            {
+              switch (GPOINTER_TO_UINT(value->data))
+                {
+                case AFMYSQL_COLUMN_DEFAULT:
+                  self->fields[i].flags |= AFMYSQL_FF_DEFAULT;
+                  break;
+                default:
+                  g_assert_not_reached();
+                  break;
+                }
+            }
+	}
+    }
+   
+  self->time_reopen = cfg->time_reopen;
+  log_template_options_init(&self->template_options, cfg);
+  
+  if (self->flush_lines == -1)
+    self->flush_lines = cfg->flush_lines;
+  if (self->flush_timeout == -1)
+    self->flush_timeout = cfg->flush_timeout;
+  
+  if ((self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS) && (self->flush_lines > 0 || self->flush_timeout > 0))
+    self->flush_lines_queued = 0;
+  
+  afmysql_dd_start_thread(self);
+  return TRUE;
+  
+  error:
+
+  stats_lock();
+  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afsql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
+  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afsql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
+  stats_unlock();
+
+  return FALSE;
+   
 }
 
 static gboolean
