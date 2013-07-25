@@ -624,7 +624,41 @@ afmysql_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options
 static void
 afmysql_dd_free(LogPipe *s)
 {
-  /**/
+  AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
+  gint i;
+
+  log_template_options_destroy(&self->template_options);
+  if (self->queue)
+    log_queue_unref(self->queue);
+  for (i = 0; i < self->fields_len; i++)
+    {
+      g_free(self->fields[i].name);
+      g_free(self->fields[i].type);
+      log_template_unref(self->fields[i].value);
+    }
+
+  g_free(self->fields);
+  g_free(self->type);
+  g_free(self->host);
+  g_free(self->port);
+  g_free(self->user);
+  g_free(self->password);
+  g_free(self->database);
+  g_free(self->encoding);
+  if (self->null_value)
+    g_free(self->null_value);
+  string_list_free(self->columns);
+  string_list_free(self->indexes);
+  string_list_free(self->values);
+  log_template_unref(self->table);
+  g_hash_table_destroy(self->validated_tables);
+  g_hash_table_destroy(self->dbd_options);
+  g_hash_table_destroy(self->dbd_options_numeric);
+  if (self->session_statements)
+    string_list_free(self->session_statements);
+  g_mutex_free(self->db_thread_mutex);
+  g_cond_free(self->db_thread_wakeup_cond);
+  log_dest_driver_free(s);
 }
 
 LogDriver *
