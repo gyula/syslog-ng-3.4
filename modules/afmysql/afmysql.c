@@ -428,6 +428,11 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 }
 
 static void
+afmysql_dd_load_db(AFMYSqlDestDriver *self)
+{
+  /* */ 
+}
+static void
 afmysql_dd_message_became_available_in_the_queue(gpointer user_data)
 {
   /**/
