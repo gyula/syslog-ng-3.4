@@ -12,9 +12,6 @@ static CfgLexerKeyword afmysql_keywords[] = {
   { "password",           KW_PASSWORD },
   { "database",           KW_DATABASE },
   { "table",              KW_TABLE },
-  
-  { "loaddata",           KW_LOAD },
-  { "bulkinsert",         KW_BULK },
 
   { "columns",            KW_COLUMNS },
   { "indexes",            KW_INDEXES },
@@ -34,7 +31,6 @@ static CfgLexerKeyword afmysql_keywords[] = {
   { "flush_timeout",      KW_FLUSH_TIMEOUT },
   { "flags",              KW_FLAGS },
 
-  { "dbd_option",         KW_DBD_OPTION },
   { NULL }
 };
 

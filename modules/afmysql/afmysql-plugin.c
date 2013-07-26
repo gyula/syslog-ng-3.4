@@ -13,7 +13,7 @@ static Plugin afmysql_plugins[] =
 };
 
 gboolean
-afsql_module_init(GlobalConfig *cfg, CfgArgs *args)
+afmysql_module_init(GlobalConfig *cfg, CfgArgs *args)
 {
   plugin_register(cfg, afmysql_plugins, G_N_ELEMENTS(afmysql_plugins));
   return TRUE;

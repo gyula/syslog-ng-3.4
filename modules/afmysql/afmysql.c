@@ -306,6 +306,23 @@ afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query, gboolean silen
   /**/
 }
 
+static gboolean
+afmysql_dd_check_sql_identifier(gchar *token, gboolean sanitize)
+{
+  gint i;
+
+  for (i = 0; token[i]; i++)
+    {
+      if (!((token[i] == '.') || (token[i] == '_') || (i && token[i] >= '0' && token[i] <= '9') || (g_ascii_tolower(token[i]) >= 'a' && g_ascii_tolower(token[i]) <= 'z')))
+        {
+          if (sanitize)
+            token[i] = '_';
+          else
+            return FALSE;
+        }
+    }
+  return TRUE;
+}
 /**
  * afsql_dd_create_index:
  *
@@ -330,7 +347,7 @@ afmysql_dd_create_index(AFMYSqlDestDriver *self, gchar *table, gchar *column)
  * NOTE: This function can only be called from the database thread.
  **/
 static GString *
-afsql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
+afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 {
   /*  */
 }
@@ -412,7 +429,11 @@ static GString *
 afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
                          LogMessage *msg)
 {
- /**/
+ GString *statement = g_string_new(NULL);
+ 
+ g_string_append(statement, g_strdup_printf("INSERT INTO %s VALUES", self ->database));
+ 
+ return statement;
 }
 
 /**
@@ -429,11 +450,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
   /**/
 }
 
-static void
-afmysql_dd_load_db(void)
-{
-  /* */ 
-}
+
 static void
 afmysql_dd_message_became_available_in_the_queue(gpointer user_data)
 {
@@ -471,7 +488,7 @@ afmysql_dd_database_thread(gpointer arg)
       g_mutex_lock(self->db_thread_mutex);
       if (self->db_thread_suspended)
         {
-          afsql_dd_wait_for_suspension_wakeup(self);
+          afmysql_dd_wait_for_suspension_wakeup(self);
           /* we loop back to check if the thread was requested to terminate */
         }
       else if (!log_queue_check_items(self->queue, NULL, afmysql_dd_message_became_available_in_the_queue, self, NULL))
@@ -509,7 +526,7 @@ afmysql_dd_database_thread(gpointer arg)
     
    while (log_queue_get_length(self->queue) > 0)
     {
-      if (!afsql_dd_insert_db(self))
+      if (!afmysql_dd_insert_db(self))
         {
           goto exit;
         }
@@ -675,8 +692,8 @@ afmysql_dd_init(LogPipe *s)
   error:
 
   stats_lock();
-  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afsql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
-  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afsql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
+  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
+  stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
   stats_unlock();
 
   return FALSE;
