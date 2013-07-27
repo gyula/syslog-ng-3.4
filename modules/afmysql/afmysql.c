@@ -367,7 +367,11 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 static gboolean
 afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 {
- /**/
+ if(afmysql_dd_run_query(self, "SET autocommit=0;"))
+   {
+     return FALSE;
+   }
+ return TRUE; 
 }
 
 /**
@@ -380,7 +384,11 @@ afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_commit_txn(AFMYSqlDestDriver *self)
 {
- /**/
+ if(afmysql_dd_run_query(self, "COMMIT;"))
+   {
+     return FALSE;
+   }
+ return TRUE; 
 }
 
 /**
@@ -420,7 +428,7 @@ static gboolean
 afmysql_dd_connect(AFMYSqlDestDriver *self)
 {
  mysql_init(self -> mysql);
- self -> mysql = NULL;
+ self -> connection = mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,0,0);
 }
 
 static gboolean
