@@ -301,9 +301,14 @@ afmysql_dd_set_flags(LogDriver *s, gint flags)
  * NOTE: This function can only be called from the database thread.
  **/
 static gboolean
-afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query, gboolean silent, mysql_result *result)
+afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query)
 {
-  /**/
+  if(mysql_query(self -> connection, query))
+    {
+      mysql_error(self -> connection);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 static gboolean
