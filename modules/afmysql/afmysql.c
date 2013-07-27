@@ -468,7 +468,7 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
             }
           else
             {
-	      gstring_appened(query_string,g_strdup_printf("'%s'", value -> str));
+	      g_string_append(query_string,g_strdup_printf("'%s'", value -> str));
               
             }
         }
