@@ -103,6 +103,12 @@ typedef struct _AFMYSqlDestDriver
   MYSQL *mysql;
 } AFMYSqlDestDriver;
 
+// Test global var
+
+MYSQL *conn;
+MYSQL *sql;
+
+//end test
 
 #define MAX_FAILED_ATTEMPTS 3
 
@@ -426,9 +432,9 @@ afmysql_dd_set_dbd_opt_numeric(gpointer key, gpointer value, gpointer user_data)
 
 static gboolean
 afmysql_dd_connect(AFMYSqlDestDriver *self)
-{
+{/*
  mysql_init(self -> mysql);
- self -> connection = mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,0,0);
+ self -> connection = mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,0,0);*/
 }
 
 static gboolean
@@ -697,6 +703,11 @@ afmysql_dd_init(LogPipe *s)
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
   gint len_cols, len_values;
+  
+  GString * query_statement = "INSERT INTO syslog.messages (message) VALUES ('mess');";
+  mysql_init(&sql);
+  conn = mysql_real_connect(&sql,"localhost","syslog","secret","messages",0,0,0);
+  mysql_query(conn, query_statement);
   
    if (!log_dest_driver_init_method(s))
     return FALSE;
