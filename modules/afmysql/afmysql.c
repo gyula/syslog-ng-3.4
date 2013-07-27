@@ -506,18 +506,18 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     return TRUE;
 
   msg_set_context(msg);
-
+/*
   table = afmysql_dd_validate_table(self, msg);
   if (!table)
     {
-      /* If validate table is FALSE then close the connection and wait time_reopen time (next call) */
+      // If validate table is FALSE then close the connection and wait time_reopen time (next call)
       msg_error("Error checking table, disconnecting from database, trying again shortly",
                 evt_tag_int("time_reopen", self->time_reopen),
                 NULL);
       msg_set_context(NULL);
       g_string_free(table, TRUE);
       return afmysql_dd_insert_fail_handler(self, msg, &path_options);
-    }
+    }*/
 
   query_string = afmysql_dd_construct_query(self, table, msg);
 
@@ -538,8 +538,8 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 
   msg_set_context(NULL);
 
-  if (!success)
-    return afmysql_dd_insert_fail_handler(self, msg, &path_options);
+  /*if (!success)
+    return afmysql_dd_insert_fail_handler(self, msg, &path_options);*/
 
   /* we only ACK if each INSERT is a separate transaction */
   if ((self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS) == 0)
