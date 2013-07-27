@@ -494,7 +494,61 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
 static gboolean
 afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 {
-  /**/
+  GString *table, *query_string;
+  LogMessage *msg;
+  gboolean success;
+  LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
+
+  afmysql_dd_connect(self);
+
+  success = log_queue_pop_head(self->queue, &msg, &path_options, (self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS), FALSE);
+  if (!success)
+    return TRUE;
+
+  msg_set_context(msg);
+
+  table = afmysql_dd_validate_table(self, msg);
+  if (!table)
+    {
+      /* If validate table is FALSE then close the connection and wait time_reopen time (next call) */
+      msg_error("Error checking table, disconnecting from database, trying again shortly",
+                evt_tag_int("time_reopen", self->time_reopen),
+                NULL);
+      msg_set_context(NULL);
+      g_string_free(table, TRUE);
+      return afmysql_dd_insert_fail_handler(self, msg, &path_options);
+    }
+
+  query_string = afmysql_dd_construct_query(self, table, msg);
+
+  if (self->flush_lines_queued == 0 && !afmysql_dd_begin_txn(self))
+    return FALSE;
+
+  success = afmysql_dd_run_query(self, query_string->str);
+  if (success && self->flush_lines_queued != -1)
+    {
+      self->flush_lines_queued++;
+
+      if (self->flush_lines && self->flush_lines_queued == self->flush_lines && !afmysql_dd_commit_txn(self))
+        return FALSE;
+    }
+
+  g_string_free(table, TRUE);
+  g_string_free(query_string, TRUE);
+
+  msg_set_context(NULL);
+
+  if (!success)
+    return afmysql_dd_insert_fail_handler(self, msg, &path_options);
+
+  /* we only ACK if each INSERT is a separate transaction */
+  if ((self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS) == 0)
+    log_msg_ack(msg, &path_options);
+  log_msg_unref(msg);
+  step_sequence_number(&self->seq_num);
+  self->failed_message_counter = 0;
+
+  return TRUE;
 }
 
 
