@@ -434,11 +434,45 @@ static GString *
 afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
                          LogMessage *msg)
 {
- GString *statement = g_string_new(NULL);
- 
- g_string_append(statement, g_strdup_printf("INSERT INTO %s VALUES", self ->database));
- 
- return statement;
+ GString *value;
+  GString *query_string;
+  gint i;
+
+  value = g_string_sized_new(256);
+  query_string = g_string_sized_new(512);
+
+  g_string_printf(query_string, "INSERT INTO %s VALUES(", table->str);
+  for (i = 0; i < self->fields_len; i++)
+    {
+
+      if (self->fields[i].value == NULL)
+        {
+          /* the config used the 'default' value for this column -> the fields[i].value is NULL, use SQL default */
+          g_string_append(query_string, "DEFAULT");
+        }
+      else
+        {
+          log_template_format(self->fields[i].value, msg, &self->template_options, LTZ_SEND, self->seq_num, NULL, value);
+
+          if (self->null_value && strcmp(self->null_value, value->str) == 0)
+            {
+              g_string_append(query_string, "NULL");
+            }
+          else
+            {
+	      gstring_appened(query_string,g_strdup_printf("'%s'", value -> str));
+              
+            }
+        }
+
+      if (i != self->fields_len - 1)
+        g_string_append(query_string, ", ");
+    }
+  g_string_append(query_string, ");");
+
+  g_string_free(value, TRUE);
+
+  return query_string;
 }
 
 /**
