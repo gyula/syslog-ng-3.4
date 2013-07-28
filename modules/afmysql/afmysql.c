@@ -1,6 +1,5 @@
 #include "afmysql.h"
 
-#if ENABLE_SQL
 
 #include "logqueue.h"
 #include "templates.h"
@@ -103,12 +102,6 @@ typedef struct _AFMYSqlDestDriver
   MYSQL *mysql;
 } AFMYSqlDestDriver;
 
-// Test global var
-
-MYSQL *conn;
-MYSQL *sql;
-
-//end test
 
 #define MAX_FAILED_ATTEMPTS 3
 
@@ -290,7 +283,7 @@ afmysql_dd_set_session_statements(LogDriver *s, GList *session_statements)
 
   self->session_statements = session_statements;
 }
-
+/*
 void
 afmysql_dd_set_flags(LogDriver *s, gint flags)
 {
@@ -298,7 +291,7 @@ afmysql_dd_set_flags(LogDriver *s, gint flags)
 
   self->flags = flags;
 }
-
+*/
 /**
  * afsql_dd_run_query:
  *
@@ -703,10 +696,15 @@ afmysql_dd_init(LogPipe *s)
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
   gint len_cols, len_values;
-  
+  // Test global var
+
+MYSQL *conn;
+MYSQL *sql;
+
+//end test
   GString * query_statement = "INSERT INTO syslog.messages (message) VALUES ('mess');";
   mysql_init(&sql);
-  conn = mysql_real_connect(&sql,"localhost","syslog","secret","messages",0,0,0);
+  conn = mysql_real_connect(&sql,"localhost","syslog","secret","syslog",0,0,0);
   mysql_query(conn, query_statement);
   
    if (!log_dest_driver_init_method(s))
@@ -928,10 +926,4 @@ afmysql_dd_new(void)
   return &self->super.super;
 }
 
-gint
-afmysql_dd_lookup_flag(const gchar *flag)
-{
-  /**/
-}
 
-#endif

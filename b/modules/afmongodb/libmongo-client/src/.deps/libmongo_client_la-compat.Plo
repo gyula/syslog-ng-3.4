@@ -1,0 +1,5 @@
+libmongo_client_la-compat.lo: \
+ ../../../../../modules/afmongodb/libmongo-client/src/compat.c \
+ ../config.h
+
+../config.h:

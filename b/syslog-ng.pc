@@ -1,0 +1,14 @@
+# Package Information for pkg-config
+prefix=/home/plagueis/install_afmysql
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+toolsdir=${prefix}/share/tools
+moduledir=/home/plagueis/install_afmysql/lib/syslog-ng
+
+Name: syslog-ng-dev
+Description: Dev package for syslog-ng module
+Version: 3.4.2
+Requires: glib-2.0
+Libs: -L${libdir} -Wl,--export-dynamic -pthread -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0  
+Cflags: -I${includedir}/syslog-ng

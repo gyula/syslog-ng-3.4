@@ -29,7 +29,6 @@ static CfgLexerKeyword afmysql_keywords[] = {
   { "retries",            KW_RETRIES, 0x0303 },
   { "flush_lines",        KW_FLUSH_LINES },
   { "flush_timeout",      KW_FLUSH_TIMEOUT },
-  { "flags",              KW_FLAGS },
 
   { NULL }
 };
