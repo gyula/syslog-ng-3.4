@@ -598,7 +598,7 @@ if test "x$enable_mysql" != "xno" && test "x$with_mysql" != "no"; then
 		LDFLAGS="$LDFLAGS_SAVE"
 	else
 		AC_MSG_CHECKING(for libMYSQL)
-		PKG_CHECK_EXISTS(libmysql, [mysql=yes], [mysql=no])		
+		AC_CHECK_PROG(mysql, mysql_config, yes, no)	
 		if test "x$mysql" = "xyes"; then
 			AC_MSG_RESULT(yes)
 			MYSQL_CFLAGS="`mysql_config --cflags`"
@@ -614,6 +614,8 @@ if test "x$enable_mysql" != "xno" && test "x$with_mysql" != "no"; then
 
 	enable_mysql=$mysql
 fi
+
+
 
 
 dnl ***************************************************************************
