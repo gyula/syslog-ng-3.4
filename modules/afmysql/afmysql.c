@@ -1,6 +1,6 @@
 #include "afmysql.h"
 
-#if ENABLE_SQL
+#ifdef ENABLE_MYSQL
 
 #include "logqueue.h"
 #include "templates.h"
@@ -103,16 +103,10 @@ typedef struct _AFMYSqlDestDriver
   MYSQL *mysql;
 } AFMYSqlDestDriver;
 
-// Test global var
-
-MYSQL *conn;
-MYSQL *sql;
-
-//end test
 
 #define MAX_FAILED_ATTEMPTS 3
 
-void
+/*void
 afmysql_dd_add_dbd_option(LogDriver *s, const gchar *name, const gchar *value)
 {
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
@@ -126,7 +120,7 @@ afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value)
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_hash_table_insert(self->dbd_options_numeric, g_strdup(name), GINT_TO_POINTER(value));
-}
+}*/
 
 void
 afmysql_dd_set_host(LogDriver *s, const gchar *host)
@@ -702,16 +696,26 @@ afmysql_dd_init(LogPipe *s)
 {
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
+
   gint len_cols, len_values;
-  
-  GString * query_statement = "INSERT INTO syslog.messages (message) VALUES ('mess');";
-  mysql_init(&sql);
-  conn = mysql_real_connect(&sql,"localhost","syslog","secret","messages",0,0,0);
-  mysql_query(conn, query_statement);
-  
+
    if (!log_dest_driver_init_method(s))
-    return FALSE;
-   
+   {
+     fprintf(stderr, "Error init_begin\n");
+     return FALSE;
+   }
+  //test
+  MYSQL *sql = NULL;
+
+  GString * query_statement = g_string_new("INSERT INTO syslog.messages (message) VALUES ('message');");
+  sql = mysql_init(NULL);
+  if (!mysql_real_connect(sql,"localhost","syslog","secret","syslog",0,NULL,0))
+  {
+     printf("%s\n",mysql_error(sql));
+     return FALSE;
+  }
+  mysql_query(sql, query_statement->str);
+  //end test   
    if (!self->columns || !self->values)
     {
       msg_error("Default columns and values must be specified for database destinations",
@@ -732,11 +736,13 @@ afmysql_dd_init(LogPipe *s)
       len_values = g_list_length(self->values);
       if (len_cols != len_values)
         {
-          msg_error("The number of columns and values do not match",
+          /*msg_error("The number of columns and values do not match",
                     evt_tag_int("len_columns", len_cols),
                     evt_tag_int("len_values", len_values),
                     NULL);
-          goto error;
+          goto error;*/
+	  fprintf(stderr, "len_cols != len_values \n");
+	  return FALSE;
         }
       self->fields_len = len_cols;
       self->fields = g_new0(AFMYSqlField, len_cols);
@@ -801,14 +807,14 @@ afmysql_dd_init(LogPipe *s)
   afmysql_dd_start_thread(self);
   return TRUE;
   
-  error:
+/*error:
 
   stats_lock();
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
   stats_unlock();
-
-  return FALSE;
+  fprintf(stderr, "Init failed!\n");
+  return FALSE;*/
    
 }
 
@@ -890,6 +896,8 @@ afmysql_dd_free(LogPipe *s)
 LogDriver *
 afmysql_dd_new(void)
 {
+  // Test  var
+
   AFMYSqlDestDriver *self = g_new0(AFMYSqlDestDriver, 1);
 
   log_dest_driver_init_instance(&self->super);
@@ -898,12 +906,12 @@ afmysql_dd_new(void)
   self->super.super.super.queue = afmysql_dd_queue;
   self->super.super.super.free_fn = afmysql_dd_free;
 
-  self->type = g_strdup("mysql");
-  self->host = g_strdup("");
-  self->port = g_strdup("");
-  self->user = g_strdup("syslog-ng");
-  self->password = g_strdup("");
-  self->database = g_strdup("logs");
+  //self->type = g_strdup("mysql");
+  self->host = g_strdup("127.0.0.1");
+  self->port = g_strdup("3306");
+  self->user = g_strdup("syslog");
+  self->password = g_strdup("secret");
+  self->database = g_strdup("syslog");
   self->encoding = g_strdup("UTF-8");
 
   self->table = log_template_new(configuration, NULL);
@@ -926,12 +934,6 @@ afmysql_dd_new(void)
   self->db_thread_wakeup_cond = g_cond_new();
   self->db_thread_mutex = g_mutex_new();
   return &self->super.super;
-}
-
-gint
-afmysql_dd_lookup_flag(const gchar *flag)
-{
-  /**/
 }
 
 #endif
