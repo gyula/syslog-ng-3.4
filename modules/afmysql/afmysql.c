@@ -553,10 +553,11 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     }*/
 
   query_string = afmysql_dd_construct_query(self, table, msg);
-
+  printf("Debug_val: flush_lines_queued %d\n", self -> flush_lines_queued);
   if (self->flush_lines_queued == 0 /*&& !afmysql_dd_begin_txn(self)*/)
   {
     printf("afmysql_dd_insert_db return: False\n");
+    printf("Debug_val: flush_lines_queued %d\n", self -> flush_lines_queued);
     return FALSE;
   }
   success = afmysql_dd_run_query(self -> mysql, query_string->str);
@@ -828,7 +829,6 @@ afmysql_dd_init(LogPipe *s)
                 }
             }
 	}
-	printf("\nend init\n");
     }
    
   self->time_reopen = cfg->time_reopen;
@@ -838,11 +838,12 @@ afmysql_dd_init(LogPipe *s)
     self->flush_lines = cfg->flush_lines;
   if (self->flush_timeout == -1)
     self->flush_timeout = cfg->flush_timeout;
-  
+  printf("Debug_val: flush_lines %d\n", self -> flush_lines);
   if ((self->flush_lines > 0 || self->flush_timeout > 0))
     self->flush_lines_queued = 0;
-  
+  printf("Debug_val2: flush_lines %d\n", self -> flush_lines);
   afmysql_dd_start_thread(self);
+  printf("\nend init : TRUE\n");
   return TRUE;
   
 /*error:
@@ -948,11 +949,11 @@ afmysql_dd_new(void)
   self->super.super.super.free_fn = afmysql_dd_free;
 
   //self->type = g_strdup("mysql");
-  self->host = g_strdup("127.0.0.1");
+  /*self->host = g_strdup("127.0.0.1");
   self->port = g_strdup("3306");
   self->user = g_strdup("syslog");
   self->password = g_strdup("secret");
-  self->database = g_strdup("syslog");
+  self->database = g_strdup("syslog");*/
   self->encoding = g_strdup("UTF-8");
 
   self->table = log_template_new(configuration, NULL);
