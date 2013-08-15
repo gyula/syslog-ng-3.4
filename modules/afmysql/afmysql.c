@@ -385,7 +385,7 @@ static gboolean
 afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 {
   printf("\nbegin_dd_txn\n");
- if(afmysql_dd_run_query(self, "SET autocommit=0;"))
+ if(afmysql_dd_run_query(self -> mysql, "SET autocommit=0;"))
    {
      printf("\nbegi_dd_txn: FALSE\n");
      return FALSE;
