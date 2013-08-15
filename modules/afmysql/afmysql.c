@@ -453,7 +453,7 @@ afmysql_dd_connect(AFMYSqlDestDriver *self)
 {
  printf("\nbegin dd_cnnect\n");
  self -> mysql = mysql_init(NULL);
- if(!mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,0,0))
+ if(!mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,NULL,0))
  {
    printf("%s\n", mysql_error(self -> mysql));
    printf("\nEnd dd_cnnect: false\n");
