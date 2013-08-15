@@ -99,7 +99,7 @@ typedef struct _AFMYSqlDestDriver
   guint32 failed_message_counter;
   
   //mysql related
-  MYSQL *connection;
+  //MYSQL *connection;
   MYSQL *mysql;
 } AFMYSqlDestDriver;
 
@@ -125,38 +125,52 @@ afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value)
 void
 afmysql_dd_set_host(LogDriver *s, const gchar *host)
 {
+  printf("\nBegin SET HOST\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_free(self->host);
   self->host = g_strdup(host);
+  printf("%s\n", self -> host);
+  printf("\nEnd SET HOST\n");
 }
 
 gboolean afmysql_dd_check_port(const gchar *port)
 {
+  printf("\nBegin check port\n");
   /* only digits (->numbers) are allowed */
   int len = strlen(port);
   for (int i = 0; i < len; ++i)
     if (port[i] < '0' || port[i] > '9')
+    {
+      printf("\ncheck port false\n");
       return FALSE;
+    }
+    printf("\ncheck port TRUE\n");
   return TRUE;
 }
 
 void
 afmysql_dd_set_port(LogDriver *s, const gchar *port)
 {
+  printf("\nBegin SET port\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_free(self->port);
   self->port = g_strdup(port);
+  printf("%s\n", self -> port);
+  printf("\nEnd SET port\n");
 }
 
 void
 afmysql_dd_set_user(LogDriver *s, const gchar *user)
 {
+  printf("\nBegin SET user\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_free(self->user);
   self->user = g_strdup(user);
+  printf("%s\n", self -> user);
+  printf("\nEnd SET user\n");
 }
 
 void
@@ -166,6 +180,7 @@ afmysql_dd_set_password(LogDriver *s, const gchar *password)
 
   g_free(self->password);
   self->password = g_strdup(password);
+  printf("%s\n", self -> password);
 }
 
 void
@@ -175,6 +190,7 @@ afmysql_dd_set_database(LogDriver *s, const gchar *database)
 
   g_free(self->database);
   self->database = g_strdup(database);
+  printf("database: %s\n", self -> database);
 }
 
 void
@@ -183,6 +199,7 @@ afmysql_dd_set_table(LogDriver *s, const gchar *table)
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   log_template_compile(self->table, table, NULL);
+  printf("table: %s\n", self -> table);
 }
 
 void
@@ -303,9 +320,9 @@ afmysql_dd_set_flags(LogDriver *s, gint flags)
 static gboolean
 afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query)
 {
-  if(mysql_query(self -> connection, query))
+  if(mysql_query(self -> mysql, query))
     {
-      mysql_error(self -> connection);
+      mysql_error(self -> mysql);
       return FALSE;
     }
   return TRUE;
@@ -367,10 +384,13 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 static gboolean
 afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 {
+  printf("\nbegin_dd_txn\n");
  if(afmysql_dd_run_query(self, "SET autocommit=0;"))
    {
+     printf("\nbegi_dd_txn: FALSE\n");
      return FALSE;
    }
+ printf("\nbegi_dd_txn: TRUE\n");
  return TRUE; 
 }
 
@@ -384,10 +404,13 @@ afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_commit_txn(AFMYSqlDestDriver *self)
 {
- if(afmysql_dd_run_query(self, "COMMIT;"))
+  printf("\nbegin_dd_commit_txn\n");
+ if(afmysql_dd_run_query(self -> mysql, "COMMIT;"))
    {
+     printf("\nbegi_dd_txn: FALSE\n");
      return FALSE;
    }
+   printf("\nbegi_dd_txn: TRUE\n");
  return TRUE; 
 }
 
@@ -409,7 +432,8 @@ afmysql_dd_suspend(AFMYSqlDestDriver *self)
 static void
 afmysql_dd_disconnect(AFMYSqlDestDriver *self)
 {
-  mysql_close(self -> connection);
+  mysql_close(self -> mysql);
+  printf("MySql disconnected\n");
 }
 
 static void
@@ -426,16 +450,24 @@ afmysql_dd_set_dbd_opt_numeric(gpointer key, gpointer value, gpointer user_data)
 
 static gboolean
 afmysql_dd_connect(AFMYSqlDestDriver *self)
-{/*
- mysql_init(self -> mysql);
- self -> connection = mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,0,0);*/
+{
+ printf("\nbegin dd_cnnect\n");
+ self -> mysql = mysql_init(NULL);
+ if(!mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,0,0))
+ {
+   printf("%s\n", mysql_error(self -> mysql));
+   printf("\nEnd dd_cnnect: false\n");
+   return FALSE;
+ }
+ printf("\nEnd dd_cnnect: true\n");
+ return TRUE;
 }
 
 static gboolean
 afmysql_dd_insert_fail_handler(AFMYSqlDestDriver *self, LogMessage *msg,
                              LogPathOptions *path_options)
 {
- /**/
+ printf("\nFailed to insert\n");
 }
 
 static GString *
@@ -477,7 +509,7 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
         g_string_append(query_string, ", ");
     }
   g_string_append(query_string, ");");
-
+  fprintf(stderr, query_string);
   g_string_free(value, TRUE);
 
   return query_string;
@@ -494,6 +526,7 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
 static gboolean
 afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 {
+  printf("\nbegin dd_insert\n");
   GString *table, *query_string;
   LogMessage *msg;
   gboolean success;
@@ -501,7 +534,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 
   afmysql_dd_connect(self);
 
-  success = log_queue_pop_head(self->queue, &msg, &path_options, (self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS), FALSE);
+  success = log_queue_pop_head(self->queue, &msg, &path_options, FALSE, FALSE);
   if (!success)
     return TRUE;
 
@@ -525,6 +558,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     return FALSE;
 
   success = afmysql_dd_run_query(self, query_string->str);
+  printf("QUERY: %s", query_string -> str);
   if (success && self->flush_lines_queued != -1)
     {
       self->flush_lines_queued++;
@@ -595,7 +629,7 @@ afmysql_dd_database_thread(gpointer arg)
       else if (!log_queue_check_items(self->queue, NULL, afmysql_dd_message_became_available_in_the_queue, self, NULL))
         {
           /* we have nothing to INSERT into the database, let's wait we get some new stuff */
-
+           printf("\nnothing to insert\n");
           if (self->flush_lines_queued > 0)
             {
               if (!afmysql_dd_commit_txn(self))
@@ -642,7 +676,7 @@ afmysql_dd_database_thread(gpointer arg)
 
       afmysql_dd_commit_txn(self);
     }
-
+ printf("\nend db thread\n");
  exit:
   afmysql_dd_disconnect(self);
 
@@ -694,6 +728,7 @@ afmysql_dd_format_persist_name(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_init(LogPipe *s)
 {
+  printf("\nbegin init\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
 
@@ -705,7 +740,7 @@ afmysql_dd_init(LogPipe *s)
      return FALSE;
    }
   //test
-  MYSQL *sql = NULL;
+  /*MYSQL *sql = NULL;
 
   GString * query_statement = g_string_new("INSERT INTO syslog.messages (message) VALUES ('message');");
   sql = mysql_init(NULL);
@@ -715,7 +750,7 @@ afmysql_dd_init(LogPipe *s)
      return FALSE;
   }
   mysql_query(sql, query_statement->str);
-  //end test   
+  //end test   */
    if (!self->columns || !self->values)
     {
       msg_error("Default columns and values must be specified for database destinations",
@@ -768,7 +803,7 @@ afmysql_dd_init(LogPipe *s)
             }
           if (!afmysql_dd_check_sql_identifier(self->fields[i].name, FALSE))
             {
-              msg_error("Column name is not a proper SQL name",
+              msg_error("Column name is not a proper MYSQL name",
                         evt_tag_str("column", self->fields[i].name),
                         NULL);
               return FALSE;
@@ -791,6 +826,7 @@ afmysql_dd_init(LogPipe *s)
                 }
             }
 	}
+	printf("\nend init\n");
     }
    
   self->time_reopen = cfg->time_reopen;
@@ -801,7 +837,7 @@ afmysql_dd_init(LogPipe *s)
   if (self->flush_timeout == -1)
     self->flush_timeout = cfg->flush_timeout;
   
-  if ((self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS) && (self->flush_lines > 0 || self->flush_timeout > 0))
+  if ((self->flush_lines > 0 || self->flush_timeout > 0))
     self->flush_lines_queued = 0;
   
   afmysql_dd_start_thread(self);
@@ -821,6 +857,7 @@ afmysql_dd_init(LogPipe *s)
 static gboolean
 afmysql_dd_deinit(LogPipe *s)
 {
+  printf("\nbegin DEinit\n");
    AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   afmysql_dd_stop_thread(self);
@@ -832,7 +869,7 @@ afmysql_dd_deinit(LogPipe *s)
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
   stats_unlock();
-
+  printf("\nend DEinit\n");
   if (!log_dest_driver_deinit_method(s))
     return FALSE;
 
@@ -842,6 +879,7 @@ afmysql_dd_deinit(LogPipe *s)
 static void
 afmysql_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
+  printf("\nbegin queue\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
   LogPathOptions local_options;
 
@@ -851,6 +889,7 @@ afmysql_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options
   log_msg_add_ack(msg, path_options);
   log_queue_push_tail(self->queue, log_msg_ref(msg), path_options);
   log_dest_driver_queue_method(s, msg, path_options, user_data);
+  printf("\nend queue\n");
 }
 
 static void
@@ -870,7 +909,6 @@ afmysql_dd_free(LogPipe *s)
     }
 
   g_free(self->fields);
-  g_free(self->type);
   g_free(self->host);
   g_free(self->port);
   g_free(self->user);
@@ -883,9 +921,9 @@ afmysql_dd_free(LogPipe *s)
   string_list_free(self->indexes);
   string_list_free(self->values);
   log_template_unref(self->table);
-  g_hash_table_destroy(self->validated_tables);
-  g_hash_table_destroy(self->dbd_options);
-  g_hash_table_destroy(self->dbd_options_numeric);
+  //g_hash_table_destroy(self->validated_tables);
+  //g_hash_table_destroy(self->dbd_options);
+  //g_hash_table_destroy(self->dbd_options_numeric);
   if (self->session_statements)
     string_list_free(self->session_statements);
   g_mutex_free(self->db_thread_mutex);
@@ -896,6 +934,7 @@ afmysql_dd_free(LogPipe *s)
 LogDriver *
 afmysql_dd_new(void)
 {
+  printf("\nbegin new\n");
   // Test  var
 
   AFMYSqlDestDriver *self = g_new0(AFMYSqlDestDriver, 1);
@@ -922,11 +961,11 @@ afmysql_dd_new(void)
   self->flush_timeout = -1;
   self->flush_lines_queued = -1;
   self->session_statements = NULL;
-  self->num_retries = MAX_FAILED_ATTEMPTS;
+  //self->num_retries = MAX_FAILED_ATTEMPTS;
 
-  self->validated_tables = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-  self->dbd_options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-  self->dbd_options_numeric = g_hash_table_new_full(g_str_hash, g_int_equal, g_free, NULL);
+  //self->validated_tables = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+  //self->dbd_options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+  //self->dbd_options_numeric = g_hash_table_new_full(g_str_hash, g_int_equal, g_free, NULL);
 
   log_template_options_defaults(&self->template_options);
   init_sequence_number(&self->seq_num);
@@ -934,6 +973,7 @@ afmysql_dd_new(void)
   self->db_thread_wakeup_cond = g_cond_new();
   self->db_thread_mutex = g_mutex_new();
   return &self->super.super;
+  printf("\nend new\n");
 }
 
 #endif
