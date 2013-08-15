@@ -555,8 +555,10 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
   query_string = afmysql_dd_construct_query(self, table, msg);
 
   if (self->flush_lines_queued == 0 && !afmysql_dd_begin_txn(self))
+  {
+    printf("afmysql_dd_insert_db return: False\n");
     return FALSE;
-
+  }
   success = afmysql_dd_run_query(self, query_string->str);
   printf("QUERY: %s", query_string -> str);
   if (success && self->flush_lines_queued != -1)
