@@ -563,7 +563,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     return FALSE;
   }
   printf("DEBUG 565 passed\n");
-  success = afmysql_dd_run_query(self -> mysql, query_string->str);
+  success = afmysql_dd_run_query(self, query_string->str);
   printf("QUERY: %s", query_string -> str);
   if (success && self->flush_lines_queued != -1)
     {
