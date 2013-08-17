@@ -9,7 +9,7 @@ enum
   AFMYSQL_COLUMN_DEFAULT = 1,
 };
 
-#if ENABLE_SQL
+#if ENABLE_MYSQL
 
 void afmysql_dd_set_host(LogDriver *s, const gchar *host);
 gboolean afsql_dd_check_port(const gchar *port);
@@ -31,7 +31,6 @@ void afmysql_dd_set_flush_timeout(LogDriver *s, gint flush_timeout);
 void afmysql_dd_set_session_statements(LogDriver *s, GList *session_statements);
 void afmysql_dd_set_flags(LogDriver *s, gint flags);
 LogDriver *afmysql_dd_new();
-gint afmysql_dd_lookup_flag(const gchar *flag);
 void afmysql_dd_set_retries(LogDriver *s, gint num_retries);
 void afmysql_dd_add_dbd_option(LogDriver *s, const gchar *name, const gchar *value);
 void afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value);
