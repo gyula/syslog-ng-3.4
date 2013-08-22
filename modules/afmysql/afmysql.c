@@ -311,20 +311,35 @@ afmysql_dd_set_flags(LogDriver *s, gint flags)
 }
 
 /**
- * afsql_dd_run_query:
+ * afmysql_dd_run_query:
  *
- * Run an SQL query on the connected database.
+ * Run an MYSQL query on the connected database.
  *
  * NOTE: This function can only be called from the database thread.
  **/
 static gboolean
 afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query)
 {
-  if(mysql_query(self -> mysql, query))
-    {
-      mysql_error(self -> mysql);
-      return FALSE;
-    }
+  msg_debug("Running MYSQL query",
+            evt_tag_str("query", query),
+            NULL);
+
+  const gchar *db_error;
+
+  if(mysql_query(self->mysql, query))
+     {
+          db_error = mysql_error(self->mysql);
+          msg_error("Error running MYSQL query",
+                    evt_tag_str("host", self->host),
+                    evt_tag_str("port", self->port),
+                    evt_tag_str("user", self->user),
+                    evt_tag_str("database", self->database),
+                    evt_tag_str("error", db_error),
+                    evt_tag_str("query", query),
+                    NULL);
+       return FALSE;
+     }
+  //g_free(db_error);
   return TRUE;
 }
 
