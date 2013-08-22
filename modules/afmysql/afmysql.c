@@ -585,7 +585,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     return TRUE;
 
   msg_set_context(msg);
-/*
+
   table = afmysql_dd_validate_table(self, msg);
   if (!table)
     {
@@ -595,31 +595,22 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
                 NULL);
       msg_set_context(NULL);
       g_string_free(table, TRUE);
-      return afmysql_dd_insert_fail_handler(self, msg, &path_options);
-    }*/
+      return FALSE;//afmysql_dd_insert_fail_handler(self, msg, &path_options);
+    }
 
   query_string = afmysql_dd_construct_query(self, table, msg);
-  printf("Debug_val556: flush_lines_queued %d\n", self -> flush_lines_queued);
-  //DEBUG!!!!!!!!!!!!!
   self -> flush_lines_queued = -1;
   if (self->flush_lines_queued == 0 /*&& !afmysql_dd_begin_txn(self)*/)
-  {
-    printf("afmysql_dd_insert_db return: False\n");
-    printf("Debug_val562: flush_lines_queued %d\n", self -> flush_lines_queued);
     return FALSE;
-  }
-  printf("DEBUG 565 passed\n");
+
   success = afmysql_dd_run_query(self, query_string->str);
-  printf("QUERY: %s\n", query_string -> str);
+
   if (success && self->flush_lines_queued != -1)
     {
-      printf("Debug_570\n");
       self->flush_lines_queued++;
-
       if (self->flush_lines && self->flush_lines_queued == self->flush_lines && !afmysql_dd_commit_txn(self))
         return FALSE;
     }
-  printf("Debug_576\n");
   //g_string_free(table, TRUE);
   g_string_free(query_string, TRUE);
 
