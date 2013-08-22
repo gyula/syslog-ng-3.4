@@ -38,7 +38,6 @@ extern LogDriver *last_driver;
 %type   <ptr> dest_afmysql_values
 %type   <ptr> dest_afmysql_values_build
 //%type   <num> dest_afmysql_flags
-%type   <num> dest_afmysql_flags
 
 %%
 
@@ -58,9 +57,9 @@ dest_afmysql
 dest_afmysql_params
         :
           {
-#if ENABLE_SQL
+#if ENABLE_MYSQL
             last_driver = *instance = afmysql_dd_new();
-#endif /* ENABLE_SQL */
+#endif /* ENABLE_MYSQL */
           }
           dest_afmysql_options			{ $$ = last_driver; }
         ;
