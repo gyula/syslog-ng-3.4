@@ -95,10 +95,10 @@ dest_afmysql_option
         | KW_FLUSH_LINES '(' LL_NUMBER ')'      { afmysql_dd_set_flush_lines(last_driver, $3); }
         | KW_FLUSH_TIMEOUT '(' LL_NUMBER ')'    { afmysql_dd_set_flush_timeout(last_driver, $3); }
         | KW_SESSION_STATEMENTS '(' string_list ')' { afmysql_dd_set_session_statements(last_driver, $3); }
-        | KW_FLAGS '(' dest_afmysql_flags ')'     { afmysql_dd_set_flags(last_driver, $3); }
+//        | KW_FLAGS '(' dest_afmysql_flags ')'     { afmysql_dd_set_flags(last_driver, $3); }
 	| dest_driver_option
         | KW_ENDIF {
-#endif /* ENABLE_SQL */
+#endif /* ENABLE_MYSQL */
 }
         ;
 
