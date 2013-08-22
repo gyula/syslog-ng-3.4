@@ -112,11 +112,11 @@ dest_afmysql_values_build
         |					{ $$ = NULL; }
         ;
 
-dest_afmysql_flags
+/*dest_afmysql_flags
         : string dest_afmysql_flags               { $$ = afmysql_dd_lookup_flag($1) | $2; free($1); }
         |                                       { $$ = 0; }
         ;
-
+*/
 /* INCLUDE_RULES */
 
 %%
