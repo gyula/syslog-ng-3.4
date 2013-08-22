@@ -386,7 +386,38 @@ afmysql_dd_create_index(AFMYSqlDestDriver *self, gchar *table, gchar *column)
 static GString *
 afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 {
-  /*  */
+  GString *query_string, *table;
+  gboolean success = FALSE;
+  gint i;
+
+  table = g_string_sized_new(32);
+  log_template_format(self->table, msg, &self->template_options, LTZ_LOCAL, 0, NULL, table);
+
+  if (self->flags & AFMYSQL_DDF_DONT_CREATE_TABLES)
+    return table;
+
+  afmysql_dd_check_sql_identifier(table->str, TRUE);
+
+  if (g_hash_table_lookup(self->validated_tables, table->str))
+    return table;
+
+  query_string = g_string_sized_new(512);
+
+  g_string_printf(query_string, "CREATE TABLE IF NOT EXISTS %s.%s(", self -> user, table -> str);
+  for (i = 0; i < self->fields_len; i++)
+        {
+          g_string_append_printf(query_string, "%s %s", self->fields[i].name, self->fields[i].type);
+          if (i != self->fields_len - 1)
+            g_string_append(query_string, ", ");
+        }
+  g_string_append(query_string, ");");
+  if(!afmysql_dd_run_query( self, query_string -> str))
+    {
+       msg_error("Error creating table, giving up",
+                    evt_tag_str("table", table->str),
+                    NULL);
+    }
+
 }
 
 /**
