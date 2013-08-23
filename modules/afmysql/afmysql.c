@@ -339,7 +339,9 @@ afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query)
                     NULL);
        return FALSE;
      }
-  //g_free(db_error);
+  msg_debug("MYSQL query successfully runned",
+            evt_tag_str("query", query),
+            NULL);
   return TRUE;
 }
 
