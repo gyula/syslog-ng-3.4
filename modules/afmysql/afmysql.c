@@ -146,13 +146,10 @@ gboolean afmysql_dd_check_port(const gchar *port)
 void
 afmysql_dd_set_port(LogDriver *s, const gchar *port)
 {
-  printf("\nBegin SET port\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_free(self->port);
   self->port = g_strdup(port);
-  printf("%s\n", self -> port);
-  printf("\nEnd SET port\n");
 }
 
 void
