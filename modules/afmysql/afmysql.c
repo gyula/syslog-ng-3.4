@@ -888,30 +888,15 @@ afmysql_dd_init(LogPipe *s)
   log_template_options_init(&self->template_options, cfg);
   
   if (self->flush_lines == -1)
-  {
     self->flush_lines = cfg->flush_lines;
-    msg_debug("dd_insert flush_lines",
-            evt_tag_str("value:", self -> flush_lines),
-            NULL);
-  }
   if (self->flush_timeout == -1)
-  {
     self->flush_timeout = cfg->flush_timeout;
-    msg_debug("dd_insert flush_timeout",
-            evt_tag_str("value:", self -> flush_timeout),
-            NULL);
-  }
+  printf("Debug_val: flush_lines %d\n", self -> flush_lines);
   if ((self->flush_lines > 0 || self->flush_timeout > 0))
-  {
     self->flush_lines_queued = 0;
-    msg_debug("dd_insert flush_lines self->flush_lines > 0 || self->flush_timeout > 0",
-            evt_tag_str("value:", self -> flush_lines),
-            NULL);
-  }
+  printf("Debug_val2: flush_lines %d\n", self -> flush_lines);
   afmysql_dd_start_thread(self);
-  
-  msg_debug("afmysql_dd_init finished succsessfully",
-            NULL);
+  printf("\nend init : TRUE\n");
   return TRUE;
   
 /*error:
