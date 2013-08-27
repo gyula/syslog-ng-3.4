@@ -106,14 +106,14 @@ typedef struct _AFMYSqlDestDriver
 
 #define MAX_FAILED_ATTEMPTS 3
 
-/*void
+void
 afmysql_dd_add_dbd_option(LogDriver *s, const gchar *name, const gchar *value)
 {
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_hash_table_insert(self->dbd_options, g_strdup(name), g_strdup(value));
 }
-
+/*
 void
 afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value)
 {
