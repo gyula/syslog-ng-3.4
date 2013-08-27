@@ -113,14 +113,14 @@ afmysql_dd_add_dbd_option(LogDriver *s, const gchar *name, const gchar *value)
 
   g_hash_table_insert(self->dbd_options, g_strdup(name), g_strdup(value));
 }
-/*
+
 void
 afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value)
 {
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_hash_table_insert(self->dbd_options_numeric, g_strdup(name), GINT_TO_POINTER(value));
-}*/
+}
 
 void
 afmysql_dd_set_host(LogDriver *s, const gchar *host)
