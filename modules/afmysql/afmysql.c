@@ -177,7 +177,6 @@ afmysql_dd_set_database(LogDriver *s, const gchar *database)
 
   g_free(self->database);
   self->database = g_strdup(database);
-  printf("database: %s\n", self -> database);
 }
 
 void
