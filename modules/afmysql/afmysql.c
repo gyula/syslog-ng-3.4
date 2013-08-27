@@ -468,7 +468,9 @@ static void
 afmysql_dd_disconnect(AFMYSqlDestDriver *self)
 {
   mysql_close(self -> mysql);
-  printf("MySql disconnected\n");
+  msg_debug("MYSQL disconnected",
+            NULL);
+  
 }
 
 static void
@@ -490,11 +492,16 @@ afmysql_dd_connect(AFMYSqlDestDriver *self)
  self -> mysql = mysql_init(NULL);
  if(!mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,NULL,0))
  {
-   printf("%s\n", mysql_error(self -> mysql));
-   printf("\nEnd dd_cnnect: false\n");
+   msg_error("Error establishing MYSQL connection",
+                evt_tag_str("type", self->type),
+                evt_tag_str("host", self->host),
+                evt_tag_str("port", self->port),
+                evt_tag_str("username", self->user),
+                evt_tag_str("database", self->database),
+                evt_tag_str("error", mysql_error(self -> mysql)),
+                NULL);
    return FALSE;
  }
- printf("\nEnd dd_cnnect: true\n");
  return TRUE;
 }
 
