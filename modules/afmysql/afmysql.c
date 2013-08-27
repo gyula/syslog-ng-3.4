@@ -913,7 +913,9 @@ afmysql_dd_init(LogPipe *s)
 static gboolean
 afmysql_dd_deinit(LogPipe *s)
 {
-  printf("\nbegin DEinit\n");
+  msg_debug("dd_deinit started",
+            NULL);
+  
    AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   afmysql_dd_stop_thread(self);
@@ -925,10 +927,12 @@ afmysql_dd_deinit(LogPipe *s)
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
   stats_unlock();
-  printf("\nend DEinit\n");
+
   if (!log_dest_driver_deinit_method(s))
     return FALSE;
 
+   msg_debug("dd_deinit finished succesfully",
+            NULL);
   return TRUE;
 }
 
