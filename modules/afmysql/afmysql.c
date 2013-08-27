@@ -741,7 +741,8 @@ afmysql_dd_database_thread(gpointer arg)
 
       afmysql_dd_commit_txn(self);
     }
- printf("\nend db thread\n");
+   msg_debug("End db_thread",
+            NULL);
  exit:
   afmysql_dd_disconnect(self);
 
