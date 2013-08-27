@@ -94,12 +94,9 @@ typedef struct _AFMYSqlDestDriver
   LogQueue *queue;
   /* used exclusively by the db thread */
   gint32 seq_num;
- // dbi_conn dbi_ctx;
   GHashTable *validated_tables;
   guint32 failed_message_counter;
-  
-  //mysql related
-  //MYSQL *connection;
+
   MYSQL *mysql;
 } AFMYSqlDestDriver;
 
@@ -797,7 +794,8 @@ afmysql_dd_format_persist_name(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_init(LogPipe *s)
 {
-  printf("\nbegin init\n");
+  msg_debug("Begin afmysql_dd_init ",
+            NULL);
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
 
@@ -805,7 +803,8 @@ afmysql_dd_init(LogPipe *s)
 
    if (!log_dest_driver_init_method(s))
    {
-     fprintf(stderr, "Error init_begin\n");
+     msg_debug("Error in afmysql_dd_init,   if (!log_dest_driver_init_method(s)) returned false",
+                NULL);
      return FALSE;
    }
 
@@ -829,12 +828,11 @@ afmysql_dd_init(LogPipe *s)
       len_values = g_list_length(self->values);
       if (len_cols != len_values)
         {
-          /*msg_error("The number of columns and values do not match",
+          msg_error("The number of columns and values do not match",
                     evt_tag_int("len_columns", len_cols),
                     evt_tag_int("len_values", len_values),
                     NULL);
-          goto error;*/
-	  fprintf(stderr, "len_cols != len_values \n");
+          /*goto error;*/
 	  return FALSE;
         }
       self->fields_len = len_cols;
@@ -890,15 +888,30 @@ afmysql_dd_init(LogPipe *s)
   log_template_options_init(&self->template_options, cfg);
   
   if (self->flush_lines == -1)
+  {
     self->flush_lines = cfg->flush_lines;
+    msg_debug("dd_insert flush_lines",
+            evt_tag_str("value:", self -> flush_lines),
+            NULL);
+  }
   if (self->flush_timeout == -1)
+  {
     self->flush_timeout = cfg->flush_timeout;
-  printf("Debug_val: flush_lines %d\n", self -> flush_lines);
+    msg_debug("dd_insert flush_timeout",
+            evt_tag_str("value:", self -> flush_timeout),
+            NULL);
+  }
   if ((self->flush_lines > 0 || self->flush_timeout > 0))
+  {
     self->flush_lines_queued = 0;
-  printf("Debug_val2: flush_lines %d\n", self -> flush_lines);
+    msg_debug("dd_insert flush_lines self->flush_lines > 0 || self->flush_timeout > 0",
+            evt_tag_str("value:", self -> flush_lines),
+            NULL);
+  }
   afmysql_dd_start_thread(self);
-  printf("\nend init : TRUE\n");
+  
+  msg_debug("afmysql_dd_init finished succsessfully",
+            NULL);
   return TRUE;
   
 /*error:
