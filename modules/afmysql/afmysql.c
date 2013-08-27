@@ -619,6 +619,9 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     }
 
   query_string = afmysql_dd_construct_query(self, table, msg);
+    msg_debug("flush_lines_queued",
+	      evt_tag_int("value", self -> flush_lines_queued),
+            NULL);
   self -> flush_lines_queued = -1;
   if (self->flush_lines_queued == 0 /*&& !afmysql_dd_begin_txn(self)*/)
     return FALSE;
@@ -887,14 +890,15 @@ afmysql_dd_init(LogPipe *s)
   self->time_reopen = cfg->time_reopen;
   log_template_options_init(&self->template_options, cfg);
   
-  if (self->flush_lines == -1)
+  if (self->flush_lines == -1 && cfg->flush_lines != 0)
     self->flush_lines = cfg->flush_lines;
   if (self->flush_timeout == -1)
     self->flush_timeout = cfg->flush_timeout;
   printf("Debug_val: flush_lines %d\n", self -> flush_lines);
+  printf("Debug_val: flush_timeout: %d\n", self -> flush_timeout);
   if ((self->flush_lines > 0 || self->flush_timeout > 0))
     self->flush_lines_queued = 0;
-  printf("Debug_val2: flush_lines %d\n", self -> flush_lines);
+  printf("Debug_val2: flush_lines_queued %d\n", self -> flush_lines_queued);
   afmysql_dd_start_thread(self);
   printf("\nend init : TRUE\n");
   return TRUE;
