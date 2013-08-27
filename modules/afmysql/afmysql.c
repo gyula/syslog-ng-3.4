@@ -595,7 +595,8 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
 static gboolean
 afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 {
-  printf("\nbegin dd_insert\n");
+  msg_debug("Begin afmysql_dd_insert_db",
+            NULL);
   GString *table, *query_string;
   LogMessage *msg;
   gboolean success;
@@ -807,18 +808,7 @@ afmysql_dd_init(LogPipe *s)
      fprintf(stderr, "Error init_begin\n");
      return FALSE;
    }
-  //test
-  /*MYSQL *sql = NULL;
 
-  GString * query_statement = g_string_new("INSERT INTO syslog.messages (message) VALUES ('message');");
-  sql = mysql_init(NULL);
-  if (!mysql_real_connect(sql,"localhost","syslog","secret","syslog",0,NULL,0))
-  {
-     printf("%s\n",mysql_error(sql));
-     return FALSE;
-  }
-  mysql_query(sql, query_statement->str);
-  //end test   */
    if (!self->columns || !self->values)
     {
       msg_error("Default columns and values must be specified for database destinations",
