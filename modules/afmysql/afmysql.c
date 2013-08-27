@@ -133,16 +133,13 @@ afmysql_dd_set_host(LogDriver *s, const gchar *host)
 
 gboolean afmysql_dd_check_port(const gchar *port)
 {
-  printf("\nBegin check port\n");
   /* only digits (->numbers) are allowed */
   int len = strlen(port);
   for (int i = 0; i < len; ++i)
     if (port[i] < '0' || port[i] > '9')
     {
-      printf("\ncheck port false\n");
       return FALSE;
     }
-    printf("\ncheck port TRUE\n");
   return TRUE;
 }
 
