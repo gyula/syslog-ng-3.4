@@ -155,13 +155,10 @@ afmysql_dd_set_port(LogDriver *s, const gchar *port)
 void
 afmysql_dd_set_user(LogDriver *s, const gchar *user)
 {
-  printf("\nBegin SET user\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_free(self->user);
   self->user = g_strdup(user);
-  printf("%s\n", self -> user);
-  printf("\nEnd SET user\n");
 }
 
 void
