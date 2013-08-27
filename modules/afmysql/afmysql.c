@@ -125,13 +125,10 @@ afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value)
 void
 afmysql_dd_set_host(LogDriver *s, const gchar *host)
 {
-  printf("\nBegin SET HOST\n");
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   g_free(self->host);
   self->host = g_strdup(host);
-  printf("%s\n", self -> host);
-  printf("\nEnd SET HOST\n");
 }
 
 gboolean afmysql_dd_check_port(const gchar *port)
