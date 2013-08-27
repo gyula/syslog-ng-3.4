@@ -697,7 +697,8 @@ afmysql_dd_database_thread(gpointer arg)
       else if (!log_queue_check_items(self->queue, NULL, afmysql_dd_message_became_available_in_the_queue, self, NULL))
         {
           /* we have nothing to INSERT into the database, let's wait we get some new stuff */
-           printf("\nnothing to insert\n");
+           msg_debug("Nothing to insert",
+            NULL);
           if (self->flush_lines_queued > 0)
             {
               if (!afmysql_dd_commit_txn(self))
