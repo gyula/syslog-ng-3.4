@@ -628,8 +628,8 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
     msg_debug("flush_lines_queued",
 	      evt_tag_int("value", self -> flush_lines_queued),
             NULL);
-  self -> flush_lines_queued = -1;
-  if (self->flush_lines_queued == 0 /*&& !afmysql_dd_begin_txn(self)*/)
+  //self -> flush_lines_queued = -1;
+  if (self->flush_lines_queued == 0 && !afmysql_dd_begin_txn(self))
     return FALSE;
 
   success = afmysql_dd_run_query(self, query_string->str);
