@@ -436,14 +436,20 @@ afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_commit_txn(AFMYSqlDestDriver *self)
 {
-  if(mysql_commit(self -> mysql))
-  {
-    msg_error("Error commit txn",
-                     evt_tag_str("Error:", mysql_error(self -> mysql)),
-		     NULL);
-    return FALSE;
-  }
-  return TRUE;
+  msg_debug("Started begin_txn",
+	    NULL);
+  gboolean success;
+  success = mysql_commit(self -> mysql);
+  if(success)
+    {
+      log_queue_ack_backlog(self->queue, self->flush_lines_queued);
+    }
+  else
+    {
+      log_queue_rewind_backlog(self->queue);
+    }
+  self->flush_lines_queued = 0;
+  return success;
 }
 
 /**
