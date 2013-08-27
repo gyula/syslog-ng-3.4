@@ -168,7 +168,6 @@ afmysql_dd_set_password(LogDriver *s, const gchar *password)
 
   g_free(self->password);
   self->password = g_strdup(password);
-  printf("%s\n", self -> password);
 }
 
 void
