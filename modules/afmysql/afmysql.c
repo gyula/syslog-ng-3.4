@@ -439,14 +439,14 @@ afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_commit_txn(AFMYSqlDestDriver *self)
 {
-  printf("\nbegin_dd_commit_txn\n");
- if(afmysql_dd_run_query(self -> mysql, "COMMIT;"))
-   {
-     printf("\nbegi_dd_txn: FALSE\n");
-     return FALSE;
-   }
-   printf("\nbegi_dd_txn: TRUE\n");
- return TRUE; 
+  if(mysql_commit(self -> mysql))
+  {
+    msg_error("Error commit txn",
+                     evt_tag_str("Error:", mysql_error(self -> mysql)),
+		     NULL);
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
