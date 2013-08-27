@@ -648,7 +648,8 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
   log_msg_unref(msg);
   step_sequence_number(&self->seq_num);
   self->failed_message_counter = 0;
-
+  msg_debug("Successfully finished afmysql_dd_insert_db",
+            NULL);
   return TRUE;
 }
 
