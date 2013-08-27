@@ -509,7 +509,34 @@ static gboolean
 afmysql_dd_insert_fail_handler(AFMYSqlDestDriver *self, LogMessage *msg,
                              LogPathOptions *path_options)
 {
- printf("\nFailed to insert\n");
+  if (self->failed_message_counter < self->num_retries - 1)
+    {
+      log_queue_push_head(self->queue, msg, path_options);
+
+      /* database connection status sanity check after failed query */
+      if (mysql_ping(self->mysql) != 0)
+        {
+          msg_error("Error, no MYSQL connection after failed query attempt",
+                    evt_tag_str("type", self->type),
+                    evt_tag_str("host", self->host),
+                    evt_tag_str("port", self->port),
+                    evt_tag_str("username", self->user),
+                    evt_tag_str("database", self->database),
+                    evt_tag_str("error", mysql_error(self -> mysql)),
+                    NULL);
+          return FALSE;
+        }
+
+      self->failed_message_counter++;
+      return FALSE;
+    }
+  msg_error("Multiple failures while inserting this record into the database, message dropped",
+            evt_tag_int("attempts", self->num_retries),
+            NULL);
+  stats_counter_inc(self->dropped_messages);
+  log_msg_drop(msg, path_options);
+  self->failed_message_counter = 0;
+  return TRUE;
 }
 
 static GString *
