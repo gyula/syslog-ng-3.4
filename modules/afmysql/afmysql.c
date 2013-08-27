@@ -418,14 +418,15 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 static gboolean
 afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 {
-  printf("\nbegin_dd_txn\n");
- if(afmysql_dd_run_query(self, "SET autocommit=0;"))
-   {
-     printf("\nbegi_dd_txn: FALSE\n");
-     return FALSE;
-   }
- printf("\nbegi_dd_txn: TRUE\n");
- return TRUE; 
+  // Set autocommit mode on if 1, off if 0
+  if(mysql_autocommit(self -> mysql, 1))
+  {
+    msg_error("Error begin txn",
+                    evt_tag_str("Error", mysql_error(self -> mysql)),
+                    NULL);
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
