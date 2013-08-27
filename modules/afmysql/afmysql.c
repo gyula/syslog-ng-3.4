@@ -939,7 +939,8 @@ afmysql_dd_deinit(LogPipe *s)
 static void
 afmysql_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
-  printf("\nbegin queue\n");
+  msg_debug("Begin dd_queue",
+            NULL);
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
   LogPathOptions local_options;
 
@@ -949,7 +950,8 @@ afmysql_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options
   log_msg_add_ack(msg, path_options);
   log_queue_push_tail(self->queue, log_msg_ref(msg), path_options);
   log_dest_driver_queue_method(s, msg, path_options, user_data);
-  printf("\nend queue\n");
+  msg_debug("Successfully finished dd_queue",
+            NULL);
 }
 
 static void
@@ -994,8 +996,8 @@ afmysql_dd_free(LogPipe *s)
 LogDriver *
 afmysql_dd_new(void)
 {
-  printf("\nbegin new\n");
-  // Test  var
+    msg_debug("Function dd_new started",
+            NULL);
 
   AFMYSqlDestDriver *self = g_new0(AFMYSqlDestDriver, 1);
 
@@ -1032,8 +1034,9 @@ afmysql_dd_new(void)
 
   self->db_thread_wakeup_cond = g_cond_new();
   self->db_thread_mutex = g_mutex_new();
+  msg_debug("Successfully finshed dd_new",
+            NULL);
   return &self->super.super;
-  printf("\nend new\n");
 }
 
 #endif
