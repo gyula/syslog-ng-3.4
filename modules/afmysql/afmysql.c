@@ -427,7 +427,9 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
                     evt_tag_str("table", table->str),
                     NULL);
     }
-
+  g_hash_table_insert(self->validated_tables, g_strdup(table->str), GUINT_TO_POINTER(TRUE));
+  g_string_free(query_string, TRUE);
+  return table;
 }
 
 /**
