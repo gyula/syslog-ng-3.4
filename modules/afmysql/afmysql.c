@@ -1010,23 +1010,19 @@ afmysql_dd_init(LogPipe *s)
     self->flush_lines = cfg->flush_lines;
   if (self->flush_timeout == -1)
     self->flush_timeout = cfg->flush_timeout;
-  printf("Debug_val: flush_lines %d\n", self -> flush_lines);
-  printf("Debug_val: flush_timeout: %d\n", self -> flush_timeout);
   if ((self->flush_lines > 0 || self->flush_timeout > 0))
     self->flush_lines_queued = 0;
-  printf("Debug_val2: flush_lines_queued %d\n", self -> flush_lines_queued);
   afmysql_dd_start_thread(self);
-  printf("\nend init : TRUE\n");
   return TRUE;
   
-/*error:
+error:
 
   stats_lock();
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_STORED, &self->stored_messages);
   stats_unregister_counter(SCS_SQL | SCS_DESTINATION, self->super.super.id, afmysql_dd_format_stats_instance(self), SC_TYPE_DROPPED, &self->dropped_messages);
   stats_unlock();
   fprintf(stderr, "Init failed!\n");
-  return FALSE;*/
+  return FALSE;
    
 }
 
