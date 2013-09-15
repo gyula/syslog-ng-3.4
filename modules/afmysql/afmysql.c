@@ -1140,7 +1140,7 @@ afmysql_dd_new(void)
   self->session_statements = NULL;
   //self->num_retries = MAX_FAILED_ATTEMPTS;
 
-  //self->validated_tables = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+  self->validated_tables = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
   //self->dbd_options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
   //self->dbd_options_numeric = g_hash_table_new_full(g_str_hash, g_int_equal, g_free, NULL);
 
