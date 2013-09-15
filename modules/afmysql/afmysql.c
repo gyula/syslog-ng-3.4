@@ -399,8 +399,9 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
   GString *query_string, *table;
   gboolean success = FALSE;
   gint i;
-
-  table = g_string_sized_new(32);
+  //unsigned int num_fields;
+  
+  table = g_string_new(NULL);
   log_template_format(self->table, msg, &self->template_options, LTZ_LOCAL, 0, NULL, table);
 
   if (self->flags & AFMYSQL_DDF_DONT_CREATE_TABLES)
@@ -411,8 +412,7 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
   if (g_hash_table_lookup(self->validated_tables, table->str))
     return table;
 
-  query_string = g_string_sized_new(512);
-
+  query_string = g_string_new(NULL);
   g_string_printf(query_string, "CREATE TABLE IF NOT EXISTS %s.%s(", self -> user, table -> str);
   for (i = 0; i < self->fields_len; i++)
         {
