@@ -951,7 +951,7 @@ afmysql_dd_init(LogPipe *s)
                     evt_tag_int("len_columns", len_cols),
                     evt_tag_int("len_values", len_values),
                     NULL);
-          /*goto error;*/
+          goto error;
 	  return FALSE;
         }
       self->fields_len = len_cols;
