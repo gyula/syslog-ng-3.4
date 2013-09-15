@@ -56,7 +56,7 @@ typedef struct _AFMYSqlDestDriver
   /* read by the db thread */
   gchar *type;
   gchar *host;
-  gchar *port;
+  gint port;
   gchar *user;
   gchar *password;
   gchar *database;
