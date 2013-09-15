@@ -74,16 +74,15 @@ dest_afmysql_option
 #if ENABLE_MYSQL
 }
         | KW_HOST '(' string ')'		{ afmysql_dd_set_host(last_driver, $3); free($3); }
-        | KW_PORT '(' string_or_number ')'
+        | KW_PORT '(' LL_NUMBER ')'
           {
-            CHECK_ERROR(afmysql_dd_check_port($3), @3, "Illegal sql port number: %s", $3);
             afmysql_dd_set_port(last_driver, $3);
-            free($3);
           }
         | KW_USERNAME '(' string ')'		{ afmysql_dd_set_user(last_driver, $3); free($3); }
         | KW_PASSWORD '(' string ')'		{ afmysql_dd_set_password(last_driver, $3); free($3); }
         | KW_DATABASE '(' string ')'		{ afmysql_dd_set_database(last_driver, $3); free($3); }
         | KW_TABLE '(' string ')'		{ afmysql_dd_set_table(last_driver, $3); free($3); }
+        | KW_BULK_INSERT '(' yesno ')'		{ afmysql_dd_set_bulk_insert(last_driver, $3); }
         | KW_COLUMNS '(' string_list ')'	{ afmysql_dd_set_columns(last_driver, $3); }
         | KW_INDEXES '(' string_list ')'        { afmysql_dd_set_indexes(last_driver, $3); }
         | KW_VALUES '(' dest_afmysql_values ')'		{ afmysql_dd_set_values(last_driver, $3); }
