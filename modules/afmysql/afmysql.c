@@ -709,18 +709,39 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
                 NULL);
       msg_set_context(NULL);
       g_string_free(table, TRUE);
-      return FALSE;//afmysql_dd_insert_fail_handler(self, msg, &path_options);
+      return afmysql_dd_insert_fail_handler(self, msg, &path_options);
     }
 
   query_string = afmysql_dd_construct_query(self, table, msg);
     msg_debug("flush_lines_queued",
 	      evt_tag_int("value", self -> flush_lines_queued),
             NULL);
-  //self -> flush_lines_queued = -1;
+
   if (self->flush_lines_queued == 0 && !afmysql_dd_begin_txn(self))
     return FALSE;
 
-  success = afmysql_dd_run_query(self, query_string->str);
+  if (!self->bulk_insert)
+  {
+    success = afmysql_dd_run_query(self, query_string->str);
+    msg_debug("afmysql_dd_insert_db",
+                evt_tag_int("Success:", (int)success),
+                NULL);
+  }
+  else
+    {
+      if (self->bulk_insert_index != self->flush_lines)
+        {
+          g_string_append(self->bulk_insert_query, query_string->str);
+          self->bulk_insert_index++;
+        }
+
+      if (self->bulk_insert_index == self->flush_lines)
+        {
+          success = afmysql_dd_run_query(self, self->bulk_insert_query->str);
+          self->bulk_insert_index = 0;
+          g_string_truncate(self->bulk_insert_query, 0);
+        }
+    }
 
   if (success && self->flush_lines_queued != -1)
     {
@@ -728,16 +749,16 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
       if (self->flush_lines && self->flush_lines_queued == self->flush_lines && !afmysql_dd_commit_txn(self))
         return FALSE;
     }
-  //g_string_free(table, TRUE);
+  g_string_free(table, TRUE);
   g_string_free(query_string, TRUE);
 
   msg_set_context(NULL);
 
-  /*if (!success)
-    return afmysql_dd_insert_fail_handler(self, msg, &path_options);*/
+  if (!success)
+    return afmysql_dd_insert_fail_handler(self, msg, &path_options);
 
   /* we only ACK if each INSERT is a separate transaction */
-  if ((self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS) == 0)
+  //if ((self->flags & AFMYSQL_DDF_EXPLICIT_COMMITS) == 0)
     log_msg_ack(msg, &path_options);
   log_msg_unref(msg);
   step_sequence_number(&self->seq_num);
