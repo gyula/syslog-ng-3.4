@@ -890,10 +890,10 @@ afmysql_dd_stop_thread(AFMYSqlDestDriver *self)
 static gchar *
 afmysql_dd_format_stats_instance(AFMYSqlDestDriver *self)
 {
-  static gchar persist_name[64];
+  static gchar persist_name[512];
 
   g_snprintf(persist_name, sizeof(persist_name),
-             "%s,%s,%s,%s,%s",
+             "%s,%s,%d,%s,%s",
              self->type, self->host, self->port, self->database, self->table->template);
   return persist_name;
 }
@@ -901,10 +901,10 @@ afmysql_dd_format_stats_instance(AFMYSqlDestDriver *self)
 static inline gchar *
 afmysql_dd_format_persist_name(AFMYSqlDestDriver *self)
 {
-  static gchar persist_name[256];
+  static gchar persist_name[512];
 
   g_snprintf(persist_name, sizeof(persist_name),
-             "afmysql_dd(%s,%s,%s,%s,%s)",
+             "afmysql_dd(%s,%s,%d,%s,%s)",
              self->type, self->host, self->port, self->database, self->table->template);
   return persist_name;
 }
