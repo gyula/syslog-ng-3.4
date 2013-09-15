@@ -98,6 +98,10 @@ typedef struct _AFMYSqlDestDriver
   guint32 failed_message_counter;
 
   MYSQL *mysql;
+  
+  gint bulk_insert_index;
+  gboolean bulk_insert;
+  GString *bulk_insert_query;
 } AFMYSqlDestDriver;
 
 
