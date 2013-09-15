@@ -184,7 +184,7 @@ afmysql_dd_set_table(LogDriver *s, const gchar *table)
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
   log_template_compile(self->table, table, NULL);
-  printf("table: %s\n", self -> table);
+  //printf("table: %s\n", table);
 }
 
 void
