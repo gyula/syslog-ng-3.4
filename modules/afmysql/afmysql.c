@@ -442,7 +442,7 @@ afmysql_dd_validate_table(AFMYSqlDestDriver *self, LogMessage *msg)
 static gboolean
 afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 {
-  // Set autocommit mode on if 1, off if 0
+   // Set autocommit mode on if 1, off if 0
   if(mysql_autocommit(self -> mysql, 1))
   {
     msg_error("Error begin txn",
@@ -451,6 +451,20 @@ afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
     return FALSE;
   }
   return TRUE;
+  /*msg_debug("Started begin_txn",
+	    NULL);
+  if(afmysql_dd_run_query(self, "BEGIN;"))
+  {
+    msg_debug("begin_txn true",
+	    NULL);
+    return TRUE;
+  }
+  else
+  {
+    msg_debug("begin_txn false",
+	    NULL);
+    return FALSE;
+  }*/
 }
 
 /**
