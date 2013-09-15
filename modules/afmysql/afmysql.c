@@ -316,7 +316,7 @@ afmysql_dd_run_query(AFMYSqlDestDriver *self, const gchar *query)
           db_error = mysql_error(self->mysql);
           msg_error("Error running MYSQL query",
                     evt_tag_str("host", self->host),
-                    evt_tag_str("port", self->port),
+                    evt_tag_int("port", self->port),
                     evt_tag_str("user", self->user),
                     evt_tag_str("database", self->database),
                     evt_tag_str("error", db_error),
