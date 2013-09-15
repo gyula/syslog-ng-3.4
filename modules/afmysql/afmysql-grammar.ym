@@ -32,6 +32,7 @@ extern LogDriver *last_driver;
 %token KW_MYSQL
 %token KW_DEFAULT
 %token KW_RETRIES
+%token KW_BULK_INSERT
 
 %type   <ptr> dest_afmysql
 %type   <ptr> dest_afmysql_params
