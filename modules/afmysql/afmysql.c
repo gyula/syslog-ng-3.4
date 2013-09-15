@@ -604,14 +604,27 @@ static GString *
 afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
                          LogMessage *msg)
 {
- GString *value;
+  GString *value;
   GString *query_string;
   gint i;
 
-  value = g_string_sized_new(256);
-  query_string = g_string_sized_new(512);
+  value = g_string_new(NULL);
+  query_string = g_string_new(NULL);
 
-  g_string_printf(query_string, "INSERT INTO %s VALUES(", "messages");
+    if (self->bulk_insert_index == 0)
+    {
+      g_string_printf(query_string, "INSERT INTO %s.%s (", self -> user, table->str);
+      for (i = 0; i < self->fields_len; i++)
+        {
+          g_string_append(query_string, self->fields[i].name);
+          if (i != self->fields_len - 1)
+            g_string_append(query_string, ", ");
+        }
+      g_string_append(query_string, ") VALUES (");
+    }
+  else
+    g_string_append(query_string, ", (");
+
   for (i = 0; i < self->fields_len; i++)
     {
 
