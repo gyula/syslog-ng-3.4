@@ -358,9 +358,32 @@ afmysql_dd_check_sql_identifier(gchar *token, gboolean sanitize)
 static gboolean
 afmysql_dd_create_index(AFMYSqlDestDriver *self, gchar *table, gchar *column)
 {
-  /**/
+   GString *query_string;
+  gboolean success = TRUE;
+
+  query_string = g_string_sized_new(64);
+
+  g_string_printf(query_string, "CREATE INDEX %s_%s_idx ON %s (%s)",
+                  table, column, table, column);
+  if (!afmysql_dd_run_query(self, query_string->str))
+    {
+      msg_error("Error adding missing index",
+                evt_tag_str("table", table),
+                evt_tag_str("column", column),
+                NULL);
+      success = FALSE;
+    }
+  g_string_free(query_string, TRUE);
+  return success;
 }
 
+/*check the columns*/
+/*static int afmysql_dd_get_field_id(MYSQL_RES result, const char *fieldname)
+{
+  int target field;
+  return target_field;
+}
+*/
 /**
  * afsql_dd_validate_table:
  *
