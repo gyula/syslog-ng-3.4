@@ -12,8 +12,7 @@ enum
 #if ENABLE_MYSQL
 
 void afmysql_dd_set_host(LogDriver *s, const gchar *host);
-gboolean afsql_dd_check_port(const gchar *port);
-void afmysql_dd_set_port(LogDriver *s, const gchar *port);
+void afmysql_dd_set_port(LogDriver *s, gint port);
 void afmysql_dd_set_user(LogDriver *s, const gchar *user);
 void afmysql_dd_set_password(LogDriver *s, const gchar *password);
 void afmysql_dd_set_database(LogDriver *s, const gchar *database);
