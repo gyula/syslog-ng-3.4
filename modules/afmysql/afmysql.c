@@ -577,10 +577,10 @@ afmysql_dd_insert_fail_handler(AFMYSqlDestDriver *self, LogMessage *msg,
       /* database connection status sanity check after failed query */
       if (mysql_ping(self->mysql) != 0)
         {
-          msg_error("Error, no MYSQL connection after failed query attempt",
+          msg_error("Error, no SQL connection after failed query attempt",
                     evt_tag_str("type", self->type),
                     evt_tag_str("host", self->host),
-                    evt_tag_str("port", self->port),
+                    evt_tag_int("port", self->port),
                     evt_tag_str("username", self->user),
                     evt_tag_str("database", self->database),
                     evt_tag_str("error", mysql_error(self -> mysql)),
