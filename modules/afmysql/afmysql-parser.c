@@ -10,6 +10,7 @@ static CfgLexerKeyword afmysql_keywords[] = {
   { "mysql",                KW_MYSQL },
   { "username",           KW_USERNAME },
   { "password",           KW_PASSWORD },
+  { "bulk_insert",        KW_BULK_INSERT },
   { "database",           KW_DATABASE },
   { "table",              KW_TABLE },
 
