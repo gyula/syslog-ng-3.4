@@ -694,7 +694,7 @@ afmysql_dd_insert_db(AFMYSqlDestDriver *self)
 
   afmysql_dd_connect(self);
 
-  success = log_queue_pop_head(self->queue, &msg, &path_options, FALSE, FALSE);
+  success = log_queue_pop_head(self->queue, &msg, &path_options, TRUE, FALSE);
   if (!success)
     return TRUE;
 
