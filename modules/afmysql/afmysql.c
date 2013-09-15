@@ -517,35 +517,51 @@ afmysql_dd_disconnect(AFMYSqlDestDriver *self)
   
 }
 
-static void
-afmysql_dd_set_dbd_opt(gpointer key, gpointer value, gpointer user_data)
-{
-  /* */
-}
-
-static void
-afmysql_dd_set_dbd_opt_numeric(gpointer key, gpointer value, gpointer user_data)
-{
-  /*b */
-}
-
 static gboolean
 afmysql_dd_connect(AFMYSqlDestDriver *self)
 {
- self -> mysql = mysql_init(NULL);
+    if (self->mysql)
+    return TRUE;
+
+  self->mysql = mysql_init(NULL);
+  if(!self->mysql)
+  {
+    msg_error("No such mysql driver",
+               evt_tag_str("error", mysql_error(self -> mysql)),
+               NULL);
+    return FALSE;
+  }
+
  if(!mysql_real_connect(self -> mysql, self -> host, self -> user, self -> password, self -> database, self -> port,NULL,0))
  {
    msg_error("Error establishing MYSQL connection",
                 evt_tag_str("type", self->type),
                 evt_tag_str("host", self->host),
-                evt_tag_str("port", self->port),
+                evt_tag_int("port", self->port),
                 evt_tag_str("username", self->user),
                 evt_tag_str("database", self->database),
                 evt_tag_str("error", mysql_error(self -> mysql)),
                 NULL);
    return FALSE;
  }
- return TRUE;
+  if (self->session_statements != NULL)
+    {
+      GList *l;
+
+      for (l = self->session_statements; l; l = l->next)
+        {
+          if (!afmysql_dd_run_query(self, (gchar *) l->data))
+            {
+              msg_error("Error executing SQL connection statement",
+                        evt_tag_str("statement", (gchar *) l->data),
+                        NULL);
+              return FALSE;
+            }
+        }
+    }
+
+  return TRUE;
+
 }
 
 static gboolean
