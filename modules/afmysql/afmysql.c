@@ -477,16 +477,18 @@ afmysql_dd_begin_txn(AFMYSqlDestDriver *self)
 static gboolean
 afmysql_dd_commit_txn(AFMYSqlDestDriver *self)
 {
-  msg_debug("Started begin_txn",
+  msg_debug("Started commit_txn",
 	    NULL);
   gboolean success;
-  success = mysql_commit(self -> mysql);
+  success = afmysql_dd_run_query(self, "COMMIT;");
   if(success)
     {
       log_queue_ack_backlog(self->queue, self->flush_lines_queued);
     }
   else
     {
+      msg_notice("MYSQL transaction commit failed, rewinding backlog and starting again",
+                 NULL);
       log_queue_rewind_backlog(self->queue);
     }
   self->flush_lines_queued = 0;
