@@ -30,10 +30,9 @@ void afmysql_dd_set_flush_lines(LogDriver *s, gint flush_lines);
 void afmysql_dd_set_flush_timeout(LogDriver *s, gint flush_timeout);
 void afmysql_dd_set_session_statements(LogDriver *s, GList *session_statements);
 void afmysql_dd_set_flags(LogDriver *s, gint flags);
+void afmysql_dd_set_bulk_insert(LogDriver *s, gboolean bulk_insert);
 LogDriver *afmysql_dd_new();
 void afmysql_dd_set_retries(LogDriver *s, gint num_retries);
-void afmysql_dd_add_dbd_option(LogDriver *s, const gchar *name, const gchar *value);
-void afmysql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value);
 
 #else
 
