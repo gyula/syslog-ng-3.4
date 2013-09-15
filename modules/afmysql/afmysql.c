@@ -1088,7 +1088,6 @@ afmysql_dd_free(LogPipe *s)
 
   g_free(self->fields);
   g_free(self->host);
-  g_free(self->port);
   g_free(self->user);
   g_free(self->password);
   g_free(self->database);
@@ -1099,7 +1098,7 @@ afmysql_dd_free(LogPipe *s)
   string_list_free(self->indexes);
   string_list_free(self->values);
   log_template_unref(self->table);
-  //g_hash_table_destroy(self->validated_tables);
+  g_hash_table_destroy(self->validated_tables);
   //g_hash_table_destroy(self->dbd_options);
   //g_hash_table_destroy(self->dbd_options_numeric);
   if (self->session_statements)
