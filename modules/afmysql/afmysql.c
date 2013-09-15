@@ -132,25 +132,23 @@ afmysql_dd_set_host(LogDriver *s, const gchar *host)
   self->host = g_strdup(host);
 }
 
-gboolean afmysql_dd_check_port(const gchar *port)
+void
+afmysql_dd_set_bulk_insert(LogDriver *s, gboolean bulk_insert)
 {
-  /* only digits (->numbers) are allowed */
-  int len = strlen(port);
-  for (int i = 0; i < len; ++i)
-    if (port[i] < '0' || port[i] > '9')
-    {
-      return FALSE;
-    }
-  return TRUE;
+  AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
+  
+  self->bulk_insert = bulk_insert;
+  self->bulk_insert_index = 0;
+  self->bulk_insert_query  = g_string_new(NULL);
 }
 
+
 void
-afmysql_dd_set_port(LogDriver *s, const gchar *port)
+afmysql_dd_set_port(LogDriver *s, gint port)
 {
   AFMYSqlDestDriver *self = (AFMYSqlDestDriver *) s;
 
-  g_free(self->port);
-  self->port = g_strdup(port);
+  self -> port = port;
 }
 
 void
