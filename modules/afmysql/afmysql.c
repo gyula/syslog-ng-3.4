@@ -630,7 +630,20 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
             }
           else
             {
-	      g_string_append(query_string,g_strdup_printf("'%s'", value -> str));
+              gint escaped_msg_len = strlen(value->str)*2+1;
+              char *escaped_msg=g_new0(char, escaped_msg_len);
+              mysql_real_escape_string(self->mysql, escaped_msg, value->str, strlen(value->str));
+              if (escaped_msg)
+                {
+                  g_string_append(query_string, "'");
+                  g_string_append(query_string, escaped_msg);
+                  g_string_append(query_string, "'");
+                  g_free(escaped_msg);
+                }
+              else
+                {
+                  g_string_append(query_string, "''");
+                }
               
             }
         }
@@ -638,8 +651,11 @@ afmysql_dd_construct_query(AFMYSqlDestDriver *self, GString *table,
       if (i != self->fields_len - 1)
         g_string_append(query_string, ", ");
     }
-  g_string_append(query_string, ");");
-  fprintf(stderr, query_string);
+  g_string_append(query_string, ")");
+ 
+ msg_debug("afmysql_dd_construct_query:",
+                evt_tag_str("SQL:", query_string -> str),
+                NULL);
   g_string_free(value, TRUE);
 
   return query_string;
